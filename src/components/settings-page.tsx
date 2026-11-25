@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { FontPicker } from "@/components/font-picker";
 import {
-  FONTS,
   normaliseKeyword,
+  OPEN_IN,
   SIZES,
   updateSettings,
   useSettings,
-  type FontId,
+  type OpenIn,
   type SizeId,
 } from "@/lib/settings";
 
@@ -29,20 +29,7 @@ export function SettingsPage() {
           <Row label="Theme" htmlFor="theme">
             <ThemePicker />
           </Row>
-          <Row label="Font" htmlFor="font">
-            <Select value={settings.font} onValueChange={(font) => void updateSettings({ font: font as FontId })}>
-              <SelectTrigger id="font" className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(FONTS).map(([id, f]) => (
-                  <SelectItem key={id} value={id} style={{ fontFamily: f.stack }}>
-                    {f.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Row>
+          <FontPicker font={settings.font} />
           <Row label="Text size" htmlFor="size">
             <ToggleGroup
               id="size"
@@ -63,6 +50,21 @@ export function SettingsPage() {
         <Separator />
 
         <Section title="Reading">
+          <Row label="Open articles" htmlFor="open-in" hint={OPEN_IN[settings.openIn].hint}>
+            <ToggleGroup
+              id="open-in"
+              type="single"
+              variant="outline"
+              value={settings.openIn}
+              onValueChange={(openIn) => openIn && void updateSettings({ openIn: openIn as OpenIn })}
+            >
+              {Object.entries(OPEN_IN).map(([id, o]) => (
+                <ToggleGroupItem key={id} value={id} className="px-3">
+                  {o.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </Row>
           <Row
             label="Hide read posts"
             htmlFor="hide-read"
@@ -197,7 +199,7 @@ function Section({ title, description, children }: { title: string; description?
   );
 }
 
-function Row({ label, htmlFor, hint, children }: { label: string; htmlFor: string; hint?: string; children: ReactNode }) {
+export function Row({ label, htmlFor, hint, children }: { label: string; htmlFor: string; hint?: string; children: ReactNode }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
       <div className="flex flex-col gap-0.5">

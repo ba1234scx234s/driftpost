@@ -27,6 +27,8 @@ export interface Item {
   published: number;
   summary?: string;
   content?: string;
+  /** Full article text pulled from the web page, when the feed only had a summary. */
+  fullContent?: string;
   image?: string;
   /** 0 or 1: IndexedDB can't index booleans. */
   read: 0 | 1;

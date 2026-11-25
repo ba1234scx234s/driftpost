@@ -3,13 +3,8 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "./db";
 
-export const FONTS = {
-  geist: { label: "Geist", stack: "'Geist Variable', sans-serif" },
-  system: { label: "System", stack: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" },
-  serif: { label: "Serif", stack: "ui-serif, 'New York', Charter, Georgia, 'Times New Roman', serif" },
-  mono: { label: "Mono", stack: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace" },
-} as const;
-export type FontId = keyof typeof FONTS;
+/** A built-in font id ("geist", "serif"…) or a Google font as "g:Family Name". See fonts.ts. */
+export type FontId = string;
 
 export const SIZES = {
   s: { label: "S", name: "Small", px: 14 },
@@ -30,7 +25,15 @@ export interface Settings {
   showThumbnails: boolean;
   /** Show the short description under each title in lists. */
   showSummaries: boolean;
+  /** How an article opens: in Driftpost's reader column, or the website in a new browser tab. */
+  openIn: OpenIn;
 }
+
+export const OPEN_IN = {
+  reader: { label: "In app", hint: "The article's text, in Driftpost's own layout." },
+  tab: { label: "New tab", hint: "The article's website in a new browser tab." },
+} as const;
+export type OpenIn = keyof typeof OPEN_IN;
 
 export const DEFAULT_SETTINGS: Settings = {
   font: "geist",
@@ -39,13 +42,17 @@ export const DEFAULT_SETTINGS: Settings = {
   hideRead: false,
   showThumbnails: true,
   showSummaries: true,
+  openIn: "reader",
 };
 
 const KEY = "prefs";
 
 export function useSettings(): Settings {
   const row = useLiveQuery(() => db.settings.get(KEY), []);
-  return { ...DEFAULT_SETTINGS, ...row?.value };
+  const settings: Settings = { ...DEFAULT_SETTINGS, ...row?.value };
+  // An "in-app browser" option existed briefly; anything unknown falls back to the reader.
+  if (!(settings.openIn in OPEN_IN)) settings.openIn = "reader";
+  return settings;
 }
 
 export async function updateSettings(changes: Partial<Settings>): Promise<void> {

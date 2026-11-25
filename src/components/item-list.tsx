@@ -1,50 +1,26 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { db, type Item } from "@/lib/db";
-import { makeTitleFilter, useSettings } from "@/lib/settings";
+import { useSettings } from "@/lib/settings";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { startOfToday, type View } from "@/lib/views";
+import type { View } from "@/lib/views";
 
-const PAGE = 200;
-
-export function ItemList({ view }: { view: View }) {
-  // Remount per view so "posts read while here" starts fresh each time.
-  return <ItemListInner key={String(view)} view={view} />;
+interface Props {
+  view: View;
+  items: Item[] | undefined;
+  selectedId: number | null;
+  onSelect: (item: Item) => void;
+  /** Tighter rows when the reader column is open next to the list. */
+  compact: boolean;
 }
 
-function ItemListInner({ view }: { view: View }) {
-  const today = startOfToday();
-  const { keywords, hideRead, showThumbnails, showSummaries } = useSettings();
-  const hidden = useMemo(() => makeTitleFilter(keywords), [keywords]);
-  // With "hide read posts" on, posts you open stay put until you leave this view.
-  const [readHere, setReadHere] = useState<ReadonlySet<number>>(new Set());
-
-  const items = useLiveQuery(() => {
-    const base =
-      view === "all"
-        ? db.items.orderBy("published").reverse()
-        : view === "today"
-          ? db.items.where("published").aboveOrEqual(today).reverse()
-          : db.items
-              .where("[feedId+published]")
-              .between([view, -Infinity], [view, Infinity])
-              .reverse();
-    return base
-      .filter((it) => !hidden(it.title) && (!hideRead || !it.read || readHere.has(it.id)))
-      .limit(PAGE)
-      .toArray();
-  }, [view, today, hidden, hideRead, readHere]);
+export function ItemList({ view, items, selectedId, onSelect, compact }: Props) {
+  const { hideRead, showThumbnails, showSummaries } = useSettings();
   const feedTitles = useLiveQuery(async () => new Map((await db.feeds.toArray()).map((f) => [f.id, f.title])), []);
   const showFeed = typeof view !== "number";
-
-  const markRead = (item: Item) => {
-    if (item.read) return;
-    setReadHere((prev) => new Set(prev).add(item.id));
-    void db.items.update(item.id, { read: 1 });
-  };
 
   if (!items) {
     return (
@@ -74,7 +50,7 @@ function ItemListInner({ view }: { view: View }) {
 
   return (
     <ScrollArea className="min-h-0 flex-1">
-      <ol className="mx-auto flex max-w-2xl flex-col px-4 py-2 sm:px-6">
+      <ol className={cn("mx-auto flex flex-col py-2", compact ? "px-2" : "max-w-2xl px-4 sm:px-6")}>
         {items.map((item) => (
           <ItemRow
             key={item.id}
@@ -83,7 +59,9 @@ function ItemListInner({ view }: { view: View }) {
             showFeed={showFeed}
             showThumbnail={showThumbnails}
             showSummary={showSummaries}
-            onOpen={() => markRead(item)}
+            selected={item.id === selectedId}
+            compact={compact}
+            onSelect={() => onSelect(item)}
           />
         ))}
       </ol>
@@ -91,30 +69,36 @@ function ItemListInner({ view }: { view: View }) {
   );
 }
 
-function ItemRow({
-  item,
-  feedTitle,
-  showFeed,
-  showThumbnail,
-  showSummary,
-  onOpen,
-}: {
+function ItemRow(props: {
   item: Item;
   feedTitle?: string;
   showFeed: boolean;
   showThumbnail: boolean;
   showSummary: boolean;
-  onOpen: () => void;
+  selected: boolean;
+  compact: boolean;
+  onSelect: () => void;
 }) {
+  const { item, feedTitle, showFeed, selected, compact } = props;
+  const ref = useRef<HTMLButtonElement>(null);
+
+  // Keep the selected post in view when stepping through with the arrow keys.
+  useEffect(() => {
+    if (selected) ref.current?.scrollIntoView({ block: "nearest" });
+  }, [selected]);
+
   return (
     <li className="border-border/60 border-b last:border-b-0">
-      <a
-        href={item.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={onOpen}
-        onAuxClick={onOpen}
-        className="hover:bg-accent/50 focus-visible:ring-ring -mx-3 flex gap-4 rounded-lg px-3 py-4 outline-none focus-visible:ring-2"
+      <button
+        ref={ref}
+        type="button"
+        onClick={props.onSelect}
+        aria-current={selected ? "true" : undefined}
+        className={cn(
+          "focus-visible:ring-ring my-1 flex w-full gap-4 rounded-lg px-3 text-left outline-none focus-visible:ring-2",
+          compact ? "py-2.5" : "py-3.5",
+          selected ? "bg-accent" : "hover:bg-accent/50",
+        )}
       >
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="text-muted-foreground flex items-center gap-2 text-xs">
@@ -125,26 +109,34 @@ function ItemRow({
               {relativeTime(item.published)}
             </time>
           </div>
-          <h2 className={cn("font-heading text-base leading-snug font-medium", item.read && "text-muted-foreground")}>
+          <h2
+            className={cn(
+              "font-heading leading-snug font-medium",
+              compact ? "text-sm" : "text-base",
+              item.read && !selected && "text-muted-foreground",
+            )}
+          >
             {item.title}
           </h2>
-          {showSummary && item.summary && (
-            <p className="text-muted-foreground line-clamp-2 text-sm leading-relaxed">{item.summary}</p>
+          {props.showSummary && item.summary && (
+            <p className={cn("text-muted-foreground text-sm leading-relaxed", compact ? "line-clamp-1" : "line-clamp-2")}>
+              {item.summary}
+            </p>
           )}
         </div>
-        {showThumbnail && item.image && (
+        {props.showThumbnail && item.image && (
           <img
             src={item.image}
             alt=""
             loading="lazy"
             referrerPolicy="no-referrer"
-            className="bg-muted size-16 shrink-0 rounded-md object-cover sm:size-20"
+            className={cn("bg-muted shrink-0 rounded-md object-cover", compact ? "size-12" : "size-16 sm:size-20")}
             onError={(e) => {
               e.currentTarget.style.display = "none";
             }}
           />
         )}
-      </a>
+      </button>
     </li>
   );
 }
