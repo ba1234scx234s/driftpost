@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { FeedIcon } from "@/components/feed-icon";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -136,23 +137,6 @@ export function SidebarRow(props: {
   );
 }
 
-function FeedIcon({ feed }: { feed: Feed }) {
-  const host = hostname(feed.siteUrl ?? feed.url);
-  if (!host) return <span className="bg-muted size-4 rounded-sm" />;
-  // Favicons come from the site itself, so no third-party service learns what you follow.
-  return (
-    <img
-      src={`https://${host}/favicon.ico`}
-      alt=""
-      className="size-4 rounded-sm"
-      loading="lazy"
-      onError={(e) => {
-        e.currentTarget.style.visibility = "hidden";
-      }}
-    />
-  );
-}
-
 function RemoveFeed({ feed, onRemoved }: { feed: Feed; onRemoved: () => void }) {
   return (
     <AlertDialog>
@@ -183,12 +167,4 @@ function RemoveFeed({ feed, onRemoved }: { feed: Feed; onRemoved: () => void }) 
       </AlertDialogContent>
     </AlertDialog>
   );
-}
-
-function hostname(url: string): string | null {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return null;
-  }
 }

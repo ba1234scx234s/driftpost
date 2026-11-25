@@ -14,6 +14,7 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === "/api/fetch") return proxy(request, url);
+    if (url.pathname === "/api/icon") return icon(request, url);
     if (url.pathname.startsWith("/api/")) return text("Not found", 404);
     return env.ASSETS.fetch(request);
   },
@@ -77,6 +78,111 @@ async function proxy(request: Request, url: URL): Promise<Response> {
   return new Response(body, { status: 200, headers: out });
 }
 
+const MAX_ICON_BYTES = 256 * 1024;
+const ICON_TYPES = /^image\/(x-icon|vnd\.microsoft\.icon|png|gif|jpeg|webp|svg\+xml|avif)$/;
+
+/**
+ * A site's icon, served from Driftpost's own address so the app can look at its pixels
+ * (to tell whether it needs a light tile in dark mode). Tries /favicon.ico, then the
+ * icon the homepage links to.
+ */
+async function icon(request: Request, url: URL): Promise<Response> {
+  if (request.method !== "GET") return text("Method not allowed", 405);
+  const site = request.headers.get("Sec-Fetch-Site");
+  if (site && site !== "same-origin") return text("Forbidden", 403);
+  const home = parseTarget(`https://${url.searchParams.get("host") ?? ""}/`);
+  if (!home || !url.searchParams.get("host")) return text("Invalid or disallowed host", 400);
+
+  const found =
+    (await fetchImage(new URL("/favicon.ico", home))) ?? (await fetchImage(await linkedIcon(home)));
+  if (!found) {
+    return new Response("No icon", {
+      status: 404,
+      headers: { "Content-Type": "text/plain", "Cache-Control": "public, max-age=86400" },
+    });
+  }
+  return new Response(found.body, {
+    headers: {
+      "Content-Type": found.type,
+      "Cache-Control": "public, max-age=604800",
+      // An SVG opened on its own must not run anything on Driftpost's address.
+      "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
+}
+
+async function fetchImage(target: URL | null): Promise<{ body: Uint8Array; type: string } | null> {
+  if (!target || !parseTarget(target.toString())) return null;
+  try {
+    const res = await fetch(target.toString(), {
+      headers: { "User-Agent": USER_AGENT, Accept: "image/*" },
+      redirect: "follow",
+      signal: AbortSignal.timeout(8000),
+    });
+    let type = (res.headers.get("Content-Type") ?? "").split(";")[0].trim().toLowerCase();
+    if (!res.ok) return null;
+    // Some servers send .ico files as octet-stream.
+    if (!ICON_TYPES.test(type) && /\.ico($|\?)/i.test(target.pathname)) type = "image/x-icon";
+    if (!ICON_TYPES.test(type)) return null;
+    const body = await readLimited(res, MAX_ICON_BYTES);
+    return body && body.byteLength ? { body, type } : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The icon a homepage links to, preferring small ones. */
+async function linkedIcon(home: URL): Promise<URL | null> {
+  try {
+    const res = await fetch(home.toString(), {
+      headers: { "User-Agent": USER_AGENT, Accept: "text/html" },
+      redirect: "follow",
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    const html = await readStart(res, 512 * 1024);
+    const end = html.search(/<\/head>/i);
+    const head = end > 0 ? html.slice(0, end) : html;
+    let best: { href: string; score: number } | null = null;
+    for (const tag of head.match(/<link\b[^>]*>/gi) ?? []) {
+      const rel = attr(tag, "rel")?.toLowerCase() ?? "";
+      const href = attr(tag, "href");
+      if (!href || !/\bicon\b/.test(rel)) continue;
+      const size = Number(attr(tag, "sizes")?.match(/\d+/)?.[0] ?? 0);
+      // Prefer a plain icon near 32px over a large apple-touch-icon.
+      const score = (rel.includes("apple") ? 0 : 1000) - Math.abs((size || 32) - 32);
+      if (!best || score > best.score) best = { href, score };
+    }
+    return best ? new URL(best.href.replace(/&amp;/g, "&"), res.url || home) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The first `max` bytes of a page as text: icon links sit in the head, near the top. */
+async function readStart(res: Response, max: number): Promise<string> {
+  if (!res.body) return "";
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let html = "";
+  let total = 0;
+  while (total < max) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    html += decoder.decode(value, { stream: true });
+    if (/<\/head>/i.test(html)) break;
+  }
+  await reader.cancel().catch(() => {});
+  return html;
+}
+
+function attr(tag: string, name: string): string | undefined {
+  const m = tag.match(new RegExp(`\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, "i"));
+  return m ? (m[1] ?? m[2] ?? m[3]) : undefined;
+}
+
 function parseTarget(raw: string | null): URL | null {
   if (!raw) return null;
   let target: URL;
@@ -116,7 +222,7 @@ function isPrivateIp(host: string): boolean {
   );
 }
 
-async function readLimited(res: Response): Promise<Uint8Array | null> {
+async function readLimited(res: Response, max = MAX_BYTES): Promise<Uint8Array | null> {
   if (!res.body) return new Uint8Array();
   const reader = res.body.getReader();
   const chunks: Uint8Array[] = [];
@@ -125,7 +231,7 @@ async function readLimited(res: Response): Promise<Uint8Array | null> {
     const { done, value } = await reader.read();
     if (done) break;
     total += value.byteLength;
-    if (total > MAX_BYTES) {
+    if (total > max) {
       await reader.cancel();
       return null;
     }
