@@ -75,7 +75,7 @@ export default function App() {
             </h1>
             <SubscriptionsMenu />
           </div>
-          <AddFeedForm onAdded={(feed) => setScreen(feed.id)} />
+          <AddFeedForm onAdded={(feed) => setScreen(feed.id)} onShowFeed={setScreen} />
         </div>
         <Separator />
         <FeedSidebar selected={screen} onSelect={setScreen} hidden={hidden} />

@@ -31,24 +31,36 @@ export function normaliseInput(input: string): string {
   }
 }
 
+export interface KnownFeed {
+  id: number;
+  title: string;
+}
+
 /**
- * `findKnown` returns an already-followed feed's title for a URL, so pasting
- * a site you follow (which may list several feeds) doesn't add it twice.
+ * Looks up a feed you already follow. `asSite` also matches a feed's website,
+ * so pasting the homepage of a site you follow is caught too.
+ */
+export type FindKnown = (url: string, asSite: boolean) => Promise<KnownFeed | undefined>;
+
+/**
+ * Checks for a feed you already follow at every step (what you typed, where it
+ * redirected, the feed links on the page, the final feed) so nothing is added twice.
  */
 export async function discoverFeed(
   input: string,
-  findKnown: (url: string) => Promise<string | undefined> = async () => undefined,
+  findKnown: FindKnown = async () => undefined,
 ): Promise<DiscoveredFeed> {
   const start = normaliseInput(input);
-  await assertNotKnown([start], findKnown);
+  await assertNotKnown([start], findKnown, true);
   const first = await fetchViaProxy(start);
+  await assertNotKnown([first.finalUrl], findKnown, true);
 
   const direct = looksLikeFeed(first.text, first.finalUrl);
   if (direct) return { url: first.finalUrl, feed: direct, response: first };
 
   // An HTML page: look for <link rel="alternate"> feed links, then try common paths.
   const links = feedLinks(first.text, first.finalUrl);
-  await assertNotKnown(links, findKnown);
+  await assertNotKnown(links, findKnown, false);
   const candidates = [...links, ...COMMON_PATHS.map((p) => new URL(p, first.finalUrl).toString())];
 
   for (const candidate of unique(candidates)) {
@@ -79,15 +91,15 @@ function feedLinks(html: string, base: string): string[] {
 }
 
 export class AlreadyFollowingError extends Error {
-  constructor(title: string) {
-    super(`You already follow ${title}`);
+  constructor(readonly feed: KnownFeed) {
+    super(`You already follow ${feed.title}`);
   }
 }
 
-async function assertNotKnown(urls: string[], findKnown: (url: string) => Promise<string | undefined>) {
+async function assertNotKnown(urls: string[], findKnown: FindKnown, asSite: boolean) {
   for (const url of urls) {
-    const title = await findKnown(url);
-    if (title) throw new AlreadyFollowingError(title);
+    const known = await findKnown(url, asSite);
+    if (known) throw new AlreadyFollowingError(known);
   }
 }
 

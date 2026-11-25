@@ -3,10 +3,17 @@ import { Loader2Icon, PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AlreadyFollowingError } from "@/lib/discover";
 import { subscribe } from "@/lib/feeds";
 import type { Feed } from "@/lib/db";
 
-export function AddFeedForm({ onAdded }: { onAdded: (feed: Feed) => void }) {
+export function AddFeedForm({
+  onAdded,
+  onShowFeed,
+}: {
+  onAdded: (feed: Feed) => void;
+  onShowFeed: (feedId: number) => void;
+}) {
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -20,6 +27,13 @@ export function AddFeedForm({ onAdded }: { onAdded: (feed: Feed) => void }) {
       setValue("");
       onAdded(feed);
     } catch (err) {
+      if (err instanceof AlreadyFollowingError) {
+        // Not an error as such: point to the feed you already have.
+        const { id } = err.feed;
+        toast.info(err.message, { action: { label: "Show", onClick: () => onShowFeed(id) } });
+        setValue("");
+        return;
+      }
       toast.error(err instanceof Error ? err.message : "Couldn't add that feed");
     } finally {
       setBusy(false);

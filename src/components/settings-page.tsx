@@ -74,6 +74,20 @@ export function SettingsPage() {
               onCheckedChange={(hideRead) => void updateSettings({ hideRead })}
             />
           </Row>
+          <Row label="Show thumbnails" htmlFor="thumbnails" hint="Post images next to titles in your lists.">
+            <Switch
+              id="thumbnails"
+              checked={settings.showThumbnails}
+              onCheckedChange={(showThumbnails) => void updateSettings({ showThumbnails })}
+            />
+          </Row>
+          <Row label="Show descriptions" htmlFor="summaries" hint="The short text under each title in your lists.">
+            <Switch
+              id="summaries"
+              checked={settings.showSummaries}
+              onCheckedChange={(showSummaries) => void updateSettings({ showSummaries })}
+            />
+          </Row>
         </Section>
 
         <Separator />

@@ -26,9 +26,20 @@ export interface Settings {
   keywords: string[];
   /** Only show unread posts in lists. */
   hideRead: boolean;
+  /** Show post images next to titles in lists. */
+  showThumbnails: boolean;
+  /** Show the short description under each title in lists. */
+  showSummaries: boolean;
 }
 
-export const DEFAULT_SETTINGS: Settings = { font: "geist", size: "m", keywords: [], hideRead: false };
+export const DEFAULT_SETTINGS: Settings = {
+  font: "geist",
+  size: "m",
+  keywords: [],
+  hideRead: false,
+  showThumbnails: true,
+  showSummaries: true,
+};
 
 const KEY = "prefs";
 

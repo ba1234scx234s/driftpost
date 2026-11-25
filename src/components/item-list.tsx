@@ -17,7 +17,7 @@ export function ItemList({ view }: { view: View }) {
 
 function ItemListInner({ view }: { view: View }) {
   const today = startOfToday();
-  const { keywords, hideRead } = useSettings();
+  const { keywords, hideRead, showThumbnails, showSummaries } = useSettings();
   const hidden = useMemo(() => makeTitleFilter(keywords), [keywords]);
   // With "hide read posts" on, posts you open stay put until you leave this view.
   const [readHere, setReadHere] = useState<ReadonlySet<number>>(new Set());
@@ -81,6 +81,8 @@ function ItemListInner({ view }: { view: View }) {
             item={item}
             feedTitle={feedTitles?.get(item.feedId)}
             showFeed={showFeed}
+            showThumbnail={showThumbnails}
+            showSummary={showSummaries}
             onOpen={() => markRead(item)}
           />
         ))}
@@ -93,11 +95,15 @@ function ItemRow({
   item,
   feedTitle,
   showFeed,
+  showThumbnail,
+  showSummary,
   onOpen,
 }: {
   item: Item;
   feedTitle?: string;
   showFeed: boolean;
+  showThumbnail: boolean;
+  showSummary: boolean;
   onOpen: () => void;
 }) {
   return (
@@ -122,11 +128,11 @@ function ItemRow({
           <h2 className={cn("font-heading text-base leading-snug font-medium", item.read && "text-muted-foreground")}>
             {item.title}
           </h2>
-          {item.summary && (
+          {showSummary && item.summary && (
             <p className="text-muted-foreground line-clamp-2 text-sm leading-relaxed">{item.summary}</p>
           )}
         </div>
-        {item.image && (
+        {showThumbnail && item.image && (
           <img
             src={item.image}
             alt=""

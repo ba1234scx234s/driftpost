@@ -1,7 +1,8 @@
 // Subscribing, refreshing and removing feeds.
 
 import { db, type Feed, type Item } from "./db";
-import { AlreadyFollowingError, discoverFeed } from "./discover";
+import { AlreadyFollowingError, discoverFeed, type FindKnown } from "./discover";
+import { feedKey } from "./url";
 import { buildOpml, OpmlError, parseOpml } from "./opml";
 import { parseFeed, type ParsedFeed } from "./parse";
 import { startOfToday, type View } from "./views";
@@ -10,12 +11,21 @@ import { fetchViaProxy } from "./proxy";
 export const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
 const CONCURRENCY = 4;
 
+/** Finds a followed feed by address, ignoring http/https, www, trailing slashes and tracking tags. */
+const findKnown: FindKnown = async (url, asSite) => {
+  const key = feedKey(url);
+  const feeds = await db.feeds.toArray();
+  const hit =
+    feeds.find((f) => feedKey(f.url) === key) ??
+    (asSite ? feeds.find((f) => f.siteUrl && feedKey(f.siteUrl) === key) : undefined);
+  return hit && { id: hit.id, title: hit.title };
+};
+
 export async function subscribe(input: string): Promise<Feed> {
-  const findKnown = async (u: string) => (await db.feeds.where("url").equals(u).first())?.title;
   const { url, feed, response } = await discoverFeed(input, findKnown);
 
   // The feed may have redirected to a URL we already follow.
-  const known = await findKnown(url);
+  const known = await findKnown(url, false);
   if (known) throw new AlreadyFollowingError(known);
 
   const now = Date.now();
@@ -99,14 +109,17 @@ export async function markUnread(ids: number[]): Promise<void> {
 
 export interface ImportResult {
   added: number;
-  skipped: number;
+  /** Titles of feeds skipped because you already follow them (or the file listed them twice). */
+  duplicates: string[];
   failed: number;
 }
 
 /**
- * Adds every feed in an OPML file that isn't followed yet, then fetches them.
- * Feeds that fail to load are kept (marked with the error) so a site that is
- * briefly down isn't lost; you can unfollow them afterwards.
+ * Adds every feed in an OPML file that isn't followed yet.
+ * Duplicates are caught three ways: against feeds you follow, within the file
+ * itself, and after redirects (two addresses that lead to the same feed).
+ * Feeds that fail to load are still added, marked with the error, so a site
+ * that is briefly down isn't lost; you can unfollow them afterwards.
  */
 export async function importOpml(
   text: string,
@@ -115,35 +128,72 @@ export async function importOpml(
   const entries = parseOpml(text);
   if (!entries.length) throw new OpmlError("No feeds found in that file");
 
-  const known = new Set((await db.feeds.toArray()).map((f) => f.url));
-  const fresh = entries.filter((e) => !known.has(e.url));
-  const now = Date.now();
+  const existing = await db.feeds.toArray();
+  // Every address we know, mapped to the feed's title, to explain skips.
+  const claimed = new Map<string, string>(existing.map((f) => [feedKey(f.url), f.title]));
+  const duplicates: string[] = [];
 
-  const ids = (await db.feeds.bulkAdd(
-    fresh.map((e, i) => ({
-      url: e.url,
-      title: e.title || new URL(e.url).hostname.replace(/^www\./, ""),
-      siteUrl: e.siteUrl,
-      folder: e.folder,
-      // Keep the file's order in the sidebar.
-      addedAt: now + i,
-    })) as Feed[],
-    { allKeys: true },
-  )) as number[];
-
-  let done = 0;
-  let failed = 0;
-  onProgress?.(0, ids.length);
-  await runPool(ids, async (id) => {
-    const feed = await db.feeds.get(id);
-    if (feed) {
-      await refreshFeed(feed);
-      if ((await db.feeds.get(id))?.lastError) failed++;
+  const fresh = entries.filter((e) => {
+    const key = feedKey(e.url);
+    if (claimed.has(key)) {
+      duplicates.push(claimed.get(key)!);
+      return false;
     }
-    onProgress?.(++done, ids.length);
+    claimed.set(key, e.title || e.url);
+    return true;
   });
 
-  return { added: ids.length, skipped: entries.length - fresh.length, failed };
+  const now = Date.now();
+  let done = 0;
+  let added = 0;
+  let failed = 0;
+  onProgress?.(0, fresh.length);
+
+  await runPool(
+    fresh.map((e, order) => ({ e, order })),
+    async ({ e, order }) => {
+      const title = e.title || new URL(e.url).hostname.replace(/^www\./, "");
+      const base = { title, siteUrl: e.siteUrl, folder: e.folder, addedAt: now + order };
+      try {
+        const res = await fetchViaProxy(e.url);
+        const parsed = parseFeed(res.text, res.finalUrl);
+        // Redirected to a feed you already follow, or one added earlier in this import?
+        const finalKey = feedKey(res.finalUrl);
+        if (finalKey !== feedKey(e.url)) {
+          if (claimed.has(finalKey)) {
+            duplicates.push(claimed.get(finalKey)!);
+            return;
+          }
+          claimed.set(finalKey, title);
+        }
+        const id = await db.feeds.add({
+          ...base,
+          url: res.finalUrl,
+          title: parsed.title || title,
+          siteUrl: parsed.siteUrl ?? e.siteUrl,
+          etag: res.etag,
+          lastModified: res.lastModified,
+          lastFetched: Date.now(),
+        } as Feed);
+        await storeItems(id, parsed, Date.now());
+      } catch (err) {
+        failed++;
+        await db.feeds
+          .add({
+            ...base,
+            url: e.url,
+            lastFetched: Date.now(),
+            lastError: err instanceof Error ? err.message : "Couldn't load this feed",
+          } as Feed)
+          .catch(() => undefined); // already there after all: nothing to add
+      } finally {
+        onProgress?.(++done, fresh.length);
+      }
+      added++;
+    },
+  );
+
+  return { added, duplicates, failed };
 }
 
 export async function exportOpml(): Promise<{ text: string; count: number }> {
