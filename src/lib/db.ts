@@ -5,6 +5,8 @@ export interface Feed {
   url: string;
   title: string;
   siteUrl?: string;
+  /** Folder name from an OPML import; folders get their own UI in a later milestone. */
+  folder?: string;
   etag?: string;
   lastModified?: string;
   lastFetched?: number;

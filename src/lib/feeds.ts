@@ -2,6 +2,7 @@
 
 import { db, type Feed, type Item } from "./db";
 import { AlreadyFollowingError, discoverFeed } from "./discover";
+import { buildOpml, OpmlError, parseOpml } from "./opml";
 import { parseFeed, type ParsedFeed } from "./parse";
 import { fetchViaProxy } from "./proxy";
 
@@ -67,6 +68,68 @@ export async function refreshFeed(feed: Feed): Promise<number> {
   }
 }
 
+export interface ImportResult {
+  added: number;
+  skipped: number;
+  failed: number;
+}
+
+/**
+ * Adds every feed in an OPML file that isn't followed yet, then fetches them.
+ * Feeds that fail to load are kept (marked with the error) so a site that is
+ * briefly down isn't lost; you can unfollow them afterwards.
+ */
+export async function importOpml(
+  text: string,
+  onProgress?: (done: number, total: number) => void,
+): Promise<ImportResult> {
+  const entries = parseOpml(text);
+  if (!entries.length) throw new OpmlError("No feeds found in that file");
+
+  const known = new Set((await db.feeds.toArray()).map((f) => f.url));
+  const fresh = entries.filter((e) => !known.has(e.url));
+  const now = Date.now();
+
+  const ids = (await db.feeds.bulkAdd(
+    fresh.map((e, i) => ({
+      url: e.url,
+      title: e.title || new URL(e.url).hostname.replace(/^www\./, ""),
+      siteUrl: e.siteUrl,
+      folder: e.folder,
+      // Keep the file's order in the sidebar.
+      addedAt: now + i,
+    })) as Feed[],
+    { allKeys: true },
+  )) as number[];
+
+  let done = 0;
+  let failed = 0;
+  onProgress?.(0, ids.length);
+  await runPool(ids, async (id) => {
+    const feed = await db.feeds.get(id);
+    if (feed) {
+      await refreshFeed(feed);
+      if ((await db.feeds.get(id))?.lastError) failed++;
+    }
+    onProgress?.(++done, ids.length);
+  });
+
+  return { added: ids.length, skipped: entries.length - fresh.length, failed };
+}
+
+export async function exportOpml(): Promise<{ text: string; count: number }> {
+  const feeds = await db.feeds.orderBy("addedAt").toArray();
+  return { text: buildOpml(feeds), count: feeds.length };
+}
+
+async function runPool<T>(list: T[], task: (item: T) => Promise<void>): Promise<void> {
+  let next = 0;
+  const worker = async () => {
+    while (next < list.length) await task(list[next++]);
+  };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, list.length) }, worker));
+}
+
 let running: Promise<number> | null = null;
 
 /** Refreshes every feed, a few at a time. Overlapping calls share one run. */
@@ -75,11 +138,9 @@ export function refreshAll(): Promise<number> {
     try {
       const feeds = await db.feeds.toArray();
       let total = 0;
-      let next = 0;
-      const worker = async () => {
-        while (next < feeds.length) total += await refreshFeed(feeds[next++]);
-      };
-      await Promise.all(Array.from({ length: Math.min(CONCURRENCY, feeds.length) }, worker));
+      await runPool(feeds, async (feed) => {
+        total += await refreshFeed(feed);
+      });
       return total;
     } finally {
       running = null;

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AddFeedForm } from "@/components/add-feed-form";
 import { FeedSidebar } from "@/components/feed-sidebar";
 import { ItemList } from "@/components/item-list";
+import { SubscriptionsMenu } from "@/components/subscriptions-menu";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -34,7 +35,10 @@ export default function App() {
     <div className="bg-background text-foreground flex h-dvh flex-col md:flex-row">
       <aside className="bg-sidebar flex max-h-[45dvh] shrink-0 flex-col border-b md:max-h-none md:w-72 md:border-r md:border-b-0">
         <div className="flex flex-col gap-3 p-3">
-          <h1 className="font-heading px-1 text-lg font-semibold tracking-tight">Driftpost</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="font-heading px-1 text-lg font-semibold tracking-tight">Driftpost</h1>
+            <SubscriptionsMenu />
+          </div>
           <AddFeedForm onAdded={(feed) => setSelected(feed.id)} />
         </div>
         <Separator />
