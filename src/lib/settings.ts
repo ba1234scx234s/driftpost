@@ -22,6 +22,8 @@ export interface Settings {
   keywords: string[];
   /** Posts about these topics are hidden (see topics.ts). */
   hiddenTopics: TopicId[];
+  /** Posts with one of these feed tags are hidden. Matched on the whole tag, any case. */
+  hiddenTags: string[];
   /** Only show unread posts in lists. */
   hideRead: boolean;
   /** Mark posts read when they scroll up past the top of the list. */
@@ -45,6 +47,7 @@ export const DEFAULT_SETTINGS: Settings = {
   size: "m",
   keywords: [],
   hiddenTopics: [],
+  hiddenTags: [],
   hideRead: false,
   markReadOnScroll: true,
   showThumbnails: true,
@@ -97,9 +100,35 @@ export type FilterablePost = Pick<Item, "title" | "categories" | "link">;
  * One check for everything Filters hides: keyword matches in the title and hidden topics.
  * Returns true when the post should be hidden.
  */
-export function makePostFilter(keywords: string[], hiddenTopics: TopicId[]): (post: FilterablePost) => boolean {
+export function makePostFilter(
+  keywords: string[],
+  hiddenTopics: TopicId[],
+  hiddenTags: string[] = [],
+): (post: FilterablePost) => boolean {
   const titleHidden = makeTitleFilter(keywords);
   const topics = new Set(hiddenTopics);
-  if (!topics.size) return (post) => titleHidden(post.title);
-  return (post) => titleHidden(post.title) || detectTopics(post).some((t) => topics.has(t));
+  const tags = new Set(hiddenTags.map((t) => t.toLowerCase()));
+  return (post) =>
+    titleHidden(post.title) ||
+    (tags.size > 0 && !!post.categories?.some((c) => tags.has(c.toLowerCase()))) ||
+    (topics.size > 0 && detectTopics(post).some((t) => topics.has(t)));
+}
+
+/** Adds a feed tag to the hidden list. Returns false when it was already there. */
+export async function hideTag(tag: string): Promise<boolean> {
+  const { hiddenTags } = await getSettings();
+  if (hiddenTags.some((t) => t.toLowerCase() === tag.toLowerCase())) return false;
+  await updateSettings({ hiddenTags: [...hiddenTags, tag] });
+  return true;
+}
+
+export async function unhideTag(tag: string): Promise<void> {
+  const { hiddenTags } = await getSettings();
+  await updateSettings({ hiddenTags: hiddenTags.filter((t) => t.toLowerCase() !== tag.toLowerCase()) });
+}
+
+export async function setTopicHidden(topic: TopicId, hidden: boolean): Promise<void> {
+  const { hiddenTopics } = await getSettings();
+  const next = hidden ? [...new Set([...hiddenTopics, topic])] : hiddenTopics.filter((t) => t !== topic);
+  await updateSettings({ hiddenTopics: next });
 }

@@ -32,8 +32,8 @@ export default function App() {
   const { refreshing, refreshNow } = useAutoRefresh();
   const settings = useSettings();
   const hidden = useMemo(
-    () => makePostFilter(settings.keywords, settings.hiddenTopics),
-    [settings.keywords, settings.hiddenTopics],
+    () => makePostFilter(settings.keywords, settings.hiddenTopics, settings.hiddenTags),
+    [settings.keywords, settings.hiddenTopics, settings.hiddenTags],
   );
 
   const feeds = useLiveQuery(() => db.feeds.toArray(), []);

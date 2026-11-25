@@ -13,8 +13,11 @@ const PAGE = 200;
  */
 export function useVisibleItems(view: View, keepIds: ReadonlySet<number>): Item[] | undefined {
   const today = startOfToday();
-  const { keywords, hiddenTopics, hideRead } = useSettings();
-  const hidden = useMemo(() => makePostFilter(keywords, hiddenTopics), [keywords, hiddenTopics]);
+  const { keywords, hiddenTopics, hiddenTags, hideRead } = useSettings();
+  const hidden = useMemo(
+    () => makePostFilter(keywords, hiddenTopics, hiddenTags),
+    [keywords, hiddenTopics, hiddenTags],
+  );
 
   return useLiveQuery(() => {
     const base =

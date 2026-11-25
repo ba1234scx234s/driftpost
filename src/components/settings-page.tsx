@@ -14,6 +14,7 @@ import { FontPicker } from "@/components/font-picker";
 import {
   normaliseKeyword,
   OPEN_IN,
+  unhideTag,
   SIZES,
   updateSettings,
   useSettings,
@@ -112,6 +113,7 @@ export function SettingsPage() {
           description="Hidden posts don't show in any list and don't count as unread."
         >
           <TopicFilters hidden={settings.hiddenTopics} />
+          {settings.hiddenTags.length > 0 && <HiddenTags tags={settings.hiddenTags} />}
           <div className="flex flex-col gap-2">
             <Label htmlFor="keyword">Words in the title</Label>
             <p className="text-muted-foreground -mt-1 text-xs">Whole words only, upper or lower case doesn't matter.</p>
@@ -179,6 +181,36 @@ function TopicFilters({ hidden }: { hidden: TopicId[] }) {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function HiddenTags({ tags }: { tags: string[] }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label>Tags</Label>
+      <p className="text-muted-foreground -mt-1 text-xs">
+        Posts with these tags from their feed are hidden. Add more by clicking a tag on an article.
+      </p>
+      <ul className="flex flex-wrap gap-2" aria-label="Hidden tags">
+        {tags.map((tag) => (
+          <li
+            key={tag}
+            className="bg-secondary text-secondary-foreground flex items-center gap-1 rounded-full py-0.5 pr-1 pl-3 text-sm"
+          >
+            {tag}
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              className="rounded-full"
+              aria-label={`Show posts tagged ${tag} again`}
+              onClick={() => void unhideTag(tag)}
+            >
+              <XIcon />
+            </Button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
