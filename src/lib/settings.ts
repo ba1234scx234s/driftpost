@@ -26,6 +26,8 @@ export interface Settings {
   hiddenTags: string[];
   /** Only show unread posts in lists. */
   hideRead: boolean;
+  /** Leave feeds with nothing unread out of the sidebar, behind a "N feeds read" link. */
+  hideReadFeeds: boolean;
   /** Mark posts read when they scroll up past the top of the list. */
   markReadOnScroll: boolean;
   /** Show post images next to titles in lists. */
@@ -49,6 +51,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hiddenTopics: [],
   hiddenTags: [],
   hideRead: false,
+  hideReadFeeds: false,
   markReadOnScroll: true,
   showThumbnails: true,
   showSummaries: true,

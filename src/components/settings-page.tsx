@@ -80,6 +80,17 @@ export function SettingsPage() {
             />
           </Row>
           <Row
+            label="Hide read feeds"
+            htmlFor="hide-read-feeds"
+            hint="Feeds with nothing unread leave the sidebar. A link under the list shows them again."
+          >
+            <Switch
+              id="hide-read-feeds"
+              checked={settings.hideReadFeeds}
+              onCheckedChange={(hideReadFeeds) => void updateSettings({ hideReadFeeds })}
+            />
+          </Row>
+          <Row
             label="Mark as read when scrolled past"
             htmlFor="read-on-scroll"
             hint="Unread posts count as read once they scroll up out of view."

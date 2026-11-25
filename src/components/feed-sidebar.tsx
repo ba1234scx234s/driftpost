@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { CircleAlertIcon, InboxIcon, SunIcon, Trash2Icon } from "lucide-react";
 import {
@@ -18,7 +19,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { db, type Feed } from "@/lib/db";
 import { unsubscribe } from "@/lib/feeds";
 import { cn } from "@/lib/utils";
-import type { FilterablePost } from "@/lib/settings";
+import { useSettings, type FilterablePost } from "@/lib/settings";
 import { startOfToday, type Screen } from "@/lib/views";
 
 interface Props {
@@ -43,6 +44,13 @@ export function FeedSidebar({ selected, onSelect, hidden }: Props) {
     return { counts, today: todayCount };
   }, [today, hidden]);
 
+  // "Hide read feeds": feeds with nothing unread go behind a link, except the one you're in.
+  const { hideReadFeeds } = useSettings();
+  const [showReadFeeds, setShowReadFeeds] = useState(false);
+  const isRead = (feed: Feed) => !!unread && !unread.counts.get(feed.id) && selected !== feed.id;
+  const readFeedCount = hideReadFeeds ? feeds.filter(isRead).length : 0;
+  const shownFeeds = readFeedCount && !showReadFeeds ? feeds.filter((f) => !isRead(f)) : feeds;
+
   return (
     <ScrollArea className="min-h-0 flex-1">
       <nav className="flex flex-col gap-0.5 p-2" aria-label="Feeds">
@@ -61,7 +69,7 @@ export function FeedSidebar({ selected, onSelect, hidden }: Props) {
           count={unread?.today}
         />
         {feeds.length > 0 && <p className="text-muted-foreground px-2 pt-4 pb-1 text-xs font-medium">Feeds</p>}
-        {feeds.map((feed) => (
+        {shownFeeds.map((feed) => (
           <SidebarRow
             key={feed.id}
             active={selected === feed.id}
@@ -80,6 +88,18 @@ export function FeedSidebar({ selected, onSelect, hidden }: Props) {
             }
           />
         ))}
+        {readFeedCount > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowReadFeeds((v) => !v)}
+            aria-expanded={showReadFeeds}
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 mt-1 self-start rounded-sm px-2 py-1 text-xs underline-offset-2 outline-none hover:underline focus-visible:ring-[3px]"
+          >
+            {showReadFeeds
+              ? "Hide read feeds"
+              : `${readFeedCount} ${readFeedCount === 1 ? "feed" : "feeds"} read`}
+          </button>
+        )}
         {feeds.length === 0 && (
           <p className="text-muted-foreground px-2 pt-4 text-sm">Add a site above to start reading.</p>
         )}
