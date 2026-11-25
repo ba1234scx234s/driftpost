@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { TOPIC_IDS, TOPICS, type TopicId } from "@/lib/topics";
+import { BackupSection } from "@/components/backup-section";
 import { FontPicker } from "@/components/font-picker";
 import {
   normaliseKeyword,
@@ -130,6 +131,13 @@ export function SettingsPage() {
             <p className="text-muted-foreground -mt-1 text-xs">Whole words only, upper or lower case doesn't matter.</p>
             <KeywordFilters keywords={settings.keywords} />
           </div>
+        </Section>
+        <Separator />
+        <Section
+          title="Backup"
+          description="Everything in one file: your feeds, every post with its read and starred status, your settings and filters. Driftpost only keeps your data in this browser, so a backup is how you move it or keep it safe."
+        >
+          <BackupSection />
         </Section>
       </div>
     </ScrollArea>

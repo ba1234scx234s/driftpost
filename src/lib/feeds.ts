@@ -306,7 +306,7 @@ export async function exportOpml(): Promise<{ text: string; count: number }> {
   return { text: buildOpml(feeds), count: feeds.length };
 }
 
-async function runPool<T>(list: T[], task: (item: T) => Promise<void>): Promise<void> {
+export async function runPool<T>(list: T[], task: (item: T) => Promise<void>): Promise<void> {
   let next = 0;
   const worker = async () => {
     while (next < list.length) await task(list[next++]);
