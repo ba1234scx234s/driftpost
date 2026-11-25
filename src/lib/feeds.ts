@@ -4,6 +4,7 @@ import { db, type Feed, type Item } from "./db";
 import { AlreadyFollowingError, discoverFeed } from "./discover";
 import { buildOpml, OpmlError, parseOpml } from "./opml";
 import { parseFeed, type ParsedFeed } from "./parse";
+import { startOfToday, type View } from "./views";
 import { fetchViaProxy } from "./proxy";
 
 export const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
@@ -66,6 +67,30 @@ export async function refreshFeed(feed: Feed): Promise<number> {
     });
     return 0;
   }
+}
+
+/** Unread items in a view: everything, today's posts, or one feed. */
+export function unreadInView(view: View) {
+  const unread = db.items.where("read").equals(0);
+  if (view === "all") return unread;
+  if (view === "today") {
+    const since = startOfToday();
+    return unread.filter((it) => it.published >= since);
+  }
+  return unread.filter((it) => it.feedId === view);
+}
+
+/** Marks every unread item in the view as read. Returns their ids so it can be undone. */
+export async function markAllRead(view: View): Promise<number[]> {
+  return db.transaction("rw", db.items, async () => {
+    const ids = (await unreadInView(view).primaryKeys()) as number[];
+    await db.items.bulkUpdate(ids.map((key) => ({ key, changes: { read: 1 as const } })));
+    return ids;
+  });
+}
+
+export async function markUnread(ids: number[]): Promise<void> {
+  await db.items.bulkUpdate(ids.map((key) => ({ key, changes: { read: 0 as const } })));
 }
 
 export interface ImportResult {

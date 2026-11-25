@@ -4,22 +4,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { db, type Item } from "@/lib/db";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { startOfToday, type View } from "@/lib/views";
 
 const PAGE = 200;
 
-export function ItemList({ feedId }: { feedId: number | "all" }) {
-  const items = useLiveQuery(
-    () =>
-      feedId === "all"
-        ? db.items.orderBy("published").reverse().limit(PAGE).toArray()
-        : db.items
-            .where("[feedId+published]")
-            .between([feedId, -Infinity], [feedId, Infinity])
-            .reverse()
-            .limit(PAGE)
-            .toArray(),
-    [feedId],
-  );
+export function ItemList({ view }: { view: View }) {
+  const today = startOfToday();
+  const items = useLiveQuery(() => {
+    if (view === "all") return db.items.orderBy("published").reverse().limit(PAGE).toArray();
+    if (view === "today") return db.items.where("published").aboveOrEqual(today).reverse().limit(PAGE).toArray();
+    return db.items
+      .where("[feedId+published]")
+      .between([view, -Infinity], [view, Infinity])
+      .reverse()
+      .limit(PAGE)
+      .toArray();
+  }, [view, today]);
+  const showFeed = typeof view !== "number";
   const feedTitles = useLiveQuery(async () => new Map((await db.feeds.toArray()).map((f) => [f.id, f.title])), []);
 
   if (!items) {
@@ -39,7 +40,9 @@ export function ItemList({ feedId }: { feedId: number | "all" }) {
   if (items.length === 0) {
     return (
       <div className="text-muted-foreground flex flex-1 items-center justify-center p-8 text-center text-sm">
-        Nothing here yet. New posts drift in as your feeds update.
+        {view === "today"
+          ? "Nothing new today yet. Posts from today drift in as your feeds update."
+          : "Nothing here yet. New posts drift in as your feeds update."}
       </div>
     );
   }
@@ -48,7 +51,7 @@ export function ItemList({ feedId }: { feedId: number | "all" }) {
     <ScrollArea className="min-h-0 flex-1">
       <ol className="mx-auto flex max-w-2xl flex-col px-4 py-2 sm:px-6">
         {items.map((item) => (
-          <ItemRow key={item.id} item={item} feedTitle={feedTitles?.get(item.feedId)} showFeed={feedId === "all"} />
+          <ItemRow key={item.id} item={item} feedTitle={feedTitles?.get(item.feedId)} showFeed={showFeed} />
         ))}
       </ol>
     </ScrollArea>

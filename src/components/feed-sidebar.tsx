@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { CircleAlertIcon, InboxIcon, Trash2Icon } from "lucide-react";
+import { CircleAlertIcon, InboxIcon, SunIcon, Trash2Icon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,20 +17,26 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { db, type Feed } from "@/lib/db";
 import { unsubscribe } from "@/lib/feeds";
 import { cn } from "@/lib/utils";
+import { startOfToday, type View } from "@/lib/views";
 
 interface Props {
-  selected: number | "all";
-  onSelect: (id: number | "all") => void;
+  selected: View;
+  onSelect: (view: View) => void;
 }
 
 export function FeedSidebar({ selected, onSelect }: Props) {
   const feeds = useLiveQuery(() => db.feeds.orderBy("addedAt").toArray(), []) ?? [];
   // Unread counts stay small and quiet on purpose.
+  const today = startOfToday();
   const unread = useLiveQuery(async () => {
     const counts = new Map<number, number>();
-    await db.items.where("read").equals(0).each((it) => counts.set(it.feedId, (counts.get(it.feedId) ?? 0) + 1));
-    return counts;
-  }, []);
+    let todayCount = 0;
+    await db.items.where("read").equals(0).each((it) => {
+      counts.set(it.feedId, (counts.get(it.feedId) ?? 0) + 1);
+      if (it.published >= today) todayCount++;
+    });
+    return { counts, today: todayCount };
+  }, [today]);
 
   return (
     <ScrollArea className="min-h-0 flex-1">
@@ -40,7 +46,14 @@ export function FeedSidebar({ selected, onSelect }: Props) {
           onClick={() => onSelect("all")}
           icon={<InboxIcon className="size-4" />}
           label="All posts"
-          count={unread ? [...unread.values()].reduce((a, b) => a + b, 0) : undefined}
+          count={unread ? [...unread.counts.values()].reduce((a, b) => a + b, 0) : undefined}
+        />
+        <SidebarRow
+          active={selected === "today"}
+          onClick={() => onSelect("today")}
+          icon={<SunIcon className="size-4" />}
+          label="Today"
+          count={unread?.today}
         />
         {feeds.length > 0 && <p className="text-muted-foreground px-2 pt-4 pb-1 text-xs font-medium">Feeds</p>}
         {feeds.map((feed) => (
@@ -50,7 +63,7 @@ export function FeedSidebar({ selected, onSelect }: Props) {
             onClick={() => onSelect(feed.id)}
             icon={<FeedIcon feed={feed} />}
             label={feed.title}
-            count={unread?.get(feed.id)}
+            count={unread?.counts.get(feed.id)}
             error={feed.lastError}
             action={
               <RemoveFeed
@@ -103,7 +116,13 @@ function SidebarRow(props: {
           </Tooltip>
         )}
         {!!props.count && (
-          <span className="text-muted-foreground ml-auto pl-2 text-xs tabular-nums group-hover:hidden">
+          <span
+            className={cn(
+              "text-muted-foreground ml-auto pl-2 text-xs tabular-nums",
+              // Make room for the unfollow button on hover.
+              props.action && "group-focus-within:hidden group-hover:hidden",
+            )}
+          >
             {props.count}
           </span>
         )}
