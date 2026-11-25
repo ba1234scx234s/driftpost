@@ -42,6 +42,15 @@ export async function subscribe(input: string): Promise<Feed> {
   return (await db.feeds.get(id))!;
 }
 
+export const MAX_TITLE_LENGTH = 120;
+
+/** Gives a feed your own name. Refreshes won't overwrite it. */
+export async function renameFeed(feedId: number, title: string): Promise<void> {
+  const clean = title.trim().replace(/\s+/g, " ").slice(0, MAX_TITLE_LENGTH);
+  if (!clean) throw new Error("Give the feed a name");
+  await db.feeds.update(feedId, { title: clean, renamed: true });
+}
+
 export async function unsubscribe(feedId: number): Promise<void> {
   await db.transaction("rw", db.feeds, db.items, async () => {
     await db.items.where("feedId").equals(feedId).delete();
@@ -59,10 +68,13 @@ export async function refreshFeed(feed: Feed): Promise<number> {
       return 0;
     }
     const parsed = parseFeed(res.text, res.finalUrl);
+    // Re-read: the feed may have been renamed or unfollowed while we were fetching.
+    const current = await db.feeds.get(feed.id);
+    if (!current) return 0;
     const added = await storeItems(feed.id, parsed, now);
     await db.feeds.update(feed.id, {
-      // Keep the feed's own title fresh; renaming comes in a later milestone.
-      title: parsed.title || feed.title,
+      // Keep the feed's own title fresh, unless you renamed it.
+      title: current.renamed ? current.title : parsed.title || current.title,
       siteUrl: parsed.siteUrl ?? feed.siteUrl,
       etag: res.etag,
       lastModified: res.lastModified,

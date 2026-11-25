@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { CheckCheckIcon, RefreshCwIcon, SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AddFeedForm } from "@/components/add-feed-form";
+import { FeedMenu } from "@/components/feed-menu";
 import { FeedSidebar, SidebarRow } from "@/components/feed-sidebar";
 import { ItemList } from "@/components/item-list";
 import { Logo } from "@/components/logo";
@@ -92,7 +93,10 @@ export default function App() {
 
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex min-h-12 items-center gap-3 border-b px-4 py-2.5 sm:px-6">
-          <h2 className="truncate text-sm font-medium">{title}</h2>
+          <div className="flex min-w-0 items-center gap-1">
+            <h2 className="truncate text-sm font-medium">{title}</h2>
+            {selectedFeed && <FeedMenu feed={selectedFeed} onUnfollowed={() => setScreen("all")} />}
+          </div>
           {isList && (
             <div className="text-muted-foreground ml-auto flex items-center gap-2 text-xs">
               {lastFetched ? <span className="hidden sm:inline">Updated {relativeTime(lastFetched)}</span> : null}

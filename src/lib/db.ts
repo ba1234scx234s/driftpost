@@ -5,6 +5,8 @@ export interface Feed {
   url: string;
   title: string;
   siteUrl?: string;
+  /** True once you rename the feed, so refreshes keep your title. */
+  renamed?: boolean;
   /** Folder name from an OPML import; folders get their own UI in a later milestone. */
   folder?: string;
   etag?: string;
