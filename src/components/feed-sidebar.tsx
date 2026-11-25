@@ -17,14 +17,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { db, type Feed } from "@/lib/db";
 import { unsubscribe } from "@/lib/feeds";
 import { cn } from "@/lib/utils";
-import { startOfToday, type View } from "@/lib/views";
+import { startOfToday, type Screen } from "@/lib/views";
 
 interface Props {
-  selected: View;
-  onSelect: (view: View) => void;
+  selected: Screen;
+  onSelect: (screen: Screen) => void;
+  /** Keyword filter: hidden posts don't count as unread. */
+  hidden: (title: string) => boolean;
 }
 
-export function FeedSidebar({ selected, onSelect }: Props) {
+export function FeedSidebar({ selected, onSelect, hidden }: Props) {
   const feeds = useLiveQuery(() => db.feeds.orderBy("addedAt").toArray(), []) ?? [];
   // Unread counts stay small and quiet on purpose.
   const today = startOfToday();
@@ -32,11 +34,12 @@ export function FeedSidebar({ selected, onSelect }: Props) {
     const counts = new Map<number, number>();
     let todayCount = 0;
     await db.items.where("read").equals(0).each((it) => {
+      if (hidden(it.title)) return;
       counts.set(it.feedId, (counts.get(it.feedId) ?? 0) + 1);
       if (it.published >= today) todayCount++;
     });
     return { counts, today: todayCount };
-  }, [today]);
+  }, [today, hidden]);
 
   return (
     <ScrollArea className="min-h-0 flex-1">
@@ -83,7 +86,7 @@ export function FeedSidebar({ selected, onSelect }: Props) {
   );
 }
 
-function SidebarRow(props: {
+export function SidebarRow(props: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;

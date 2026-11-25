@@ -32,14 +32,24 @@ export interface Item {
   addedAt: number;
 }
 
+export interface SettingRow {
+  key: string;
+  value: any;
+}
+
 export const db = new Dexie("driftpost") as Dexie & {
   feeds: EntityTable<Feed, "id">;
   items: EntityTable<Item, "id">;
+  settings: EntityTable<SettingRow, "key">;
 };
 
 db.version(1).stores({
   feeds: "++id, &url, addedAt",
   items: "++id, feedId, &[feedId+guid], published, [feedId+published], read, starred",
+});
+
+db.version(2).stores({
+  settings: "key",
 });
 
 /** Ask the browser not to clear our data under storage pressure. */

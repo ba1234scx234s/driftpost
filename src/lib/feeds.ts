@@ -69,21 +69,25 @@ export async function refreshFeed(feed: Feed): Promise<number> {
   }
 }
 
-/** Unread items in a view: everything, today's posts, or one feed. */
-export function unreadInView(view: View) {
-  const unread = db.items.where("read").equals(0);
-  if (view === "all") return unread;
-  if (view === "today") {
-    const since = startOfToday();
-    return unread.filter((it) => it.published >= since);
-  }
-  return unread.filter((it) => it.feedId === view);
+/**
+ * Unread items in a view: everything, today's posts, or one feed.
+ * `hidden` is the keyword filter; posts it hides don't count.
+ */
+export function unreadInView(view: View, hidden: (title: string) => boolean = () => false) {
+  const since = view === "today" ? startOfToday() : 0;
+  return db.items
+    .where("read")
+    .equals(0)
+    .filter(
+      (it) =>
+        (view === "all" || (view === "today" ? it.published >= since : it.feedId === view)) && !hidden(it.title),
+    );
 }
 
-/** Marks every unread item in the view as read. Returns their ids so it can be undone. */
-export async function markAllRead(view: View): Promise<number[]> {
+/** Marks every visible unread item in the view as read. Returns their ids so it can be undone. */
+export async function markAllRead(view: View, hidden?: (title: string) => boolean): Promise<number[]> {
   return db.transaction("rw", db.items, async () => {
-    const ids = (await unreadInView(view).primaryKeys()) as number[];
+    const ids = (await unreadInView(view, hidden).primaryKeys()) as number[];
     await db.items.bulkUpdate(ids.map((key) => ({ key, changes: { read: 1 as const } })));
     return ids;
   });
