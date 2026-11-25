@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { CheckCheckIcon, RefreshCwIcon, SettingsIcon } from "lucide-react";
+import { CheckCheckIcon, CompassIcon, RefreshCwIcon, SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AddFeedForm } from "@/components/add-feed-form";
 import { FeedMenu } from "@/components/feed-menu";
@@ -8,6 +8,7 @@ import { FeedSidebar, SidebarRow } from "@/components/feed-sidebar";
 import { ItemList } from "@/components/item-list";
 import { Reader } from "@/components/reader";
 import { Logo } from "@/components/logo";
+import { DiscoverPage } from "@/components/discover-page";
 import { SettingsPage } from "@/components/settings-page";
 import { SubscriptionsMenu } from "@/components/subscriptions-menu";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ import { fontStack, googleFamily, loadGoogleFont } from "@/lib/fonts";
 import { makePostFilter, SIZES, useSettings } from "@/lib/settings";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import type { Screen } from "@/lib/views";
+import type { Screen, View } from "@/lib/views";
 
 export default function App() {
   const [screen, setScreenState] = useState<Screen>("all");
@@ -39,8 +40,10 @@ export default function App() {
   const feeds = useLiveQuery(() => db.feeds.toArray(), []);
   const selectedFeed = typeof screen === "number" ? feeds?.find((f) => f.id === screen) : undefined;
   const lastFetched = feeds?.length ? Math.max(...feeds.map((f) => f.lastFetched ?? 0)) : undefined;
-  const isList = screen !== "settings";
-  const items = useVisibleItems(screen === "settings" ? "all" : screen, keepIds);
+  // The post list being shown, or null on the Settings and Discover pages.
+  const view: View | null = screen === "settings" || screen === "discover" ? null : screen;
+  const isList = view !== null;
+  const items = useVisibleItems(view ?? "all", keepIds);
 
   const setScreen = useCallback((next: Screen) => {
     setScreenState(next);
@@ -49,7 +52,7 @@ export default function App() {
   }, []);
 
   const openIn = settings.openIn;
-  const readerOpen = !!selected && openIn !== "tab" && screen !== "settings";
+  const readerOpen = !!selected && openIn !== "tab" && isList;
 
   const markRead = useCallback((item: Item) => {
     // Keep every opened post in this list until you leave it (see useVisibleItems).
@@ -84,7 +87,7 @@ export default function App() {
   // ← and → step through the list; Esc closes the article.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || screen === "settings") return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || !isList) return;
       const target = e.target;
       if (target instanceof Element && target.closest("input, textarea, select, [contenteditable=true]")) return;
       if (document.querySelector("[role=dialog], [role=alertdialog], [role=menu], [role=listbox]")) return;
@@ -128,11 +131,11 @@ export default function App() {
   }, [settings.font, settings.size]);
 
   const unreadHere =
-    useLiveQuery(() => (screen === "settings" ? 0 : unreadInView(screen, hidden).count()), [screen, hidden]) ?? 0;
+    useLiveQuery(() => (view === null ? 0 : unreadInView(view, hidden).count()), [view, hidden]) ?? 0;
 
   async function handleMarkAllRead() {
-    if (screen === "settings") return;
-    const ids = await markAllRead(screen, hidden);
+    if (view === null) return;
+    const ids = await markAllRead(view, hidden);
     if (!ids.length) return;
     toast(`Marked ${ids.length} ${ids.length === 1 ? "post" : "posts"} as read`, {
       action: { label: "Undo", onClick: () => void markUnread(ids) },
@@ -148,7 +151,9 @@ export default function App() {
   const title =
     screen === "settings"
       ? "Settings"
-      : (selectedFeed?.title ?? (screen === "today" ? "Today" : "All posts"));
+      : screen === "discover"
+        ? "Discover"
+        : (selectedFeed?.title ?? (screen === "today" ? "Today" : "All posts"));
 
   return (
     <div className="bg-background text-foreground flex h-dvh flex-col md:flex-row">
@@ -166,7 +171,13 @@ export default function App() {
         <Separator />
         <FeedSidebar selected={screen} onSelect={setScreen} hidden={hidden} />
         <Separator />
-        <div className="p-2">
+        <div className="flex flex-col gap-0.5 p-2">
+          <SidebarRow
+            active={screen === "discover"}
+            onClick={() => setScreen("discover")}
+            icon={<CompassIcon className="size-4" />}
+            label="Discover"
+          />
           <SidebarRow
             active={screen === "settings"}
             onClick={() => setScreen("settings")}
@@ -225,9 +236,11 @@ export default function App() {
         </header>
         {screen === "settings" ? (
           <SettingsPage />
+        ) : screen === "discover" ? (
+          <DiscoverPage onShowFeed={setScreen} />
         ) : (
           <ItemList
-            view={screen}
+            view={view ?? "all"}
             items={items}
             selectedId={selected?.id ?? null}
             onSelect={openItem}

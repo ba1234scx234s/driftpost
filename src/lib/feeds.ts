@@ -34,6 +34,8 @@ export async function subscribe(input: string): Promise<Feed> {
     url,
     title: feed.title,
     siteUrl: feed.siteUrl,
+    // What was typed or picked, so Discover can tell the feed is followed even after a redirect.
+    sourceUrl: input.trim(),
     etag: response.etag,
     lastModified: response.lastModified,
     lastFetched: now,

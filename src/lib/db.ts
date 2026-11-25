@@ -5,6 +5,8 @@ export interface Feed {
   url: string;
   title: string;
   siteUrl?: string;
+  /** The address it was followed from (typed, or picked in Discover), before any redirect. */
+  sourceUrl?: string;
   /** True once you rename the feed, so refreshes keep your title. */
   renamed?: boolean;
   /** Folder name from an OPML import; folders get their own UI in a later milestone. */
