@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMarkReadOnScroll } from "@/hooks/use-mark-read-on-scroll";
 import { Skeleton } from "@/components/ui/skeleton";
 import { db, type Item } from "@/lib/db";
 import { useSettings } from "@/lib/settings";
@@ -15,10 +16,14 @@ interface Props {
   onSelect: (item: Item) => void;
   /** Tighter rows when the reader column is open next to the list. */
   compact: boolean;
+  /** Called with posts that scrolled past the top while unread. */
+  onScrolledPast: (ids: number[]) => void;
 }
 
-export function ItemList({ view, items, selectedId, onSelect, compact }: Props) {
-  const { hideRead, showThumbnails, showSummaries } = useSettings();
+export function ItemList({ view, items, selectedId, onSelect, compact, onScrolledPast }: Props) {
+  const { hideRead, showThumbnails, showSummaries, markReadOnScroll } = useSettings();
+  const listRef = useRef<HTMLOListElement>(null);
+  useMarkReadOnScroll(listRef, items, markReadOnScroll, onScrolledPast);
   const feedTitles = useLiveQuery(async () => new Map((await db.feeds.toArray()).map((f) => [f.id, f.title])), []);
   const showFeed = typeof view !== "number";
 
@@ -50,7 +55,7 @@ export function ItemList({ view, items, selectedId, onSelect, compact }: Props) 
 
   return (
     <ScrollArea className="min-h-0 flex-1">
-      <ol className={cn("mx-auto flex flex-col py-2", compact ? "px-2" : "max-w-2xl px-4 sm:px-6")}>
+      <ol ref={listRef} className={cn("mx-auto flex flex-col py-2", compact ? "px-2" : "max-w-2xl px-4 sm:px-6")}>
         {items.map((item) => (
           <ItemRow
             key={item.id}
@@ -88,7 +93,7 @@ function ItemRow(props: {
   }, [selected]);
 
   return (
-    <li className="border-border/60 border-b last:border-b-0">
+    <li className="border-border/60 border-b last:border-b-0" data-item-id={item.id} data-unread={!item.read}>
       <button
         ref={ref}
         type="button"

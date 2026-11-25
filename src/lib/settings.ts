@@ -21,6 +21,8 @@ export interface Settings {
   keywords: string[];
   /** Only show unread posts in lists. */
   hideRead: boolean;
+  /** Mark posts read when they scroll up past the top of the list. */
+  markReadOnScroll: boolean;
   /** Show post images next to titles in lists. */
   showThumbnails: boolean;
   /** Show the short description under each title in lists. */
@@ -40,6 +42,7 @@ export const DEFAULT_SETTINGS: Settings = {
   size: "m",
   keywords: [],
   hideRead: false,
+  markReadOnScroll: true,
   showThumbnails: true,
   showSummaries: true,
   openIn: "reader",

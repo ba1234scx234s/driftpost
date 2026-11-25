@@ -76,6 +76,17 @@ export function SettingsPage() {
               onCheckedChange={(hideRead) => void updateSettings({ hideRead })}
             />
           </Row>
+          <Row
+            label="Mark as read when scrolled past"
+            htmlFor="read-on-scroll"
+            hint="Unread posts count as read once they scroll up out of view."
+          >
+            <Switch
+              id="read-on-scroll"
+              checked={settings.markReadOnScroll}
+              onCheckedChange={(markReadOnScroll) => void updateSettings({ markReadOnScroll })}
+            />
+          </Row>
           <Row label="Show thumbnails" htmlFor="thumbnails" hint="Post images next to titles in your lists.">
             <Switch
               id="thumbnails"

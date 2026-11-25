@@ -54,6 +54,16 @@ export default function App() {
     if (!item.read) void db.items.update(item.id, { read: 1 });
   }, []);
 
+  /** Posts scrolled past in the list: mark them read but keep them in view until you leave. */
+  const markScrolledPast = useCallback((ids: number[]) => {
+    setKeepIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.add(id));
+      return next;
+    });
+    void db.items.bulkUpdate(ids.map((key) => ({ key, changes: { read: 1 as const } })));
+  }, []);
+
   /** Opens an article the way the "Open articles" setting says. */
   const openItem = useCallback(
     (item: Item) => {
@@ -219,6 +229,7 @@ export default function App() {
             selectedId={selected?.id ?? null}
             onSelect={openItem}
             compact={readerOpen}
+            onScrolledPast={markScrolledPast}
           />
         )}
         </div>
