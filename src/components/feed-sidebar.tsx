@@ -109,7 +109,7 @@ export function SidebarRow(props: {
         className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left text-sm"
       >
         <span className="text-muted-foreground flex size-4 shrink-0 items-center justify-center">{props.icon}</span>
-        <span className="truncate">{props.label}</span>
+        <span className="truncate" title={props.label}>{props.label}</span>
         {props.error && (
           <Tooltip>
             <TooltipTrigger asChild>
