@@ -17,13 +17,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { db, type Feed } from "@/lib/db";
 import { unsubscribe } from "@/lib/feeds";
 import { cn } from "@/lib/utils";
+import type { FilterablePost } from "@/lib/settings";
 import { startOfToday, type Screen } from "@/lib/views";
 
 interface Props {
   selected: Screen;
   onSelect: (screen: Screen) => void;
   /** Keyword filter: hidden posts don't count as unread. */
-  hidden: (title: string) => boolean;
+  hidden: (post: FilterablePost) => boolean;
 }
 
 export function FeedSidebar({ selected, onSelect, hidden }: Props) {
@@ -34,7 +35,7 @@ export function FeedSidebar({ selected, onSelect, hidden }: Props) {
     const counts = new Map<number, number>();
     let todayCount = 0;
     await db.items.where("read").equals(0).each((it) => {
-      if (hidden(it.title)) return;
+      if (hidden(it)) return;
       counts.set(it.feedId, (counts.get(it.feedId) ?? 0) + 1);
       if (it.published >= today) todayCount++;
     });

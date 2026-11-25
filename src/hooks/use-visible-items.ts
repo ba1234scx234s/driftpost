@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type Item } from "@/lib/db";
-import { makeTitleFilter, useSettings } from "@/lib/settings";
+import { makePostFilter, useSettings } from "@/lib/settings";
 import { startOfToday, type View } from "@/lib/views";
 
 const PAGE = 200;
@@ -13,8 +13,8 @@ const PAGE = 200;
  */
 export function useVisibleItems(view: View, keepIds: ReadonlySet<number>): Item[] | undefined {
   const today = startOfToday();
-  const { keywords, hideRead } = useSettings();
-  const hidden = useMemo(() => makeTitleFilter(keywords), [keywords]);
+  const { keywords, hiddenTopics, hideRead } = useSettings();
+  const hidden = useMemo(() => makePostFilter(keywords, hiddenTopics), [keywords, hiddenTopics]);
 
   return useLiveQuery(() => {
     const base =
@@ -29,7 +29,7 @@ export function useVisibleItems(view: View, keepIds: ReadonlySet<number>): Item[
     return base
       // Posts opened in this list stay put, even if a new filter or "hide read" would hide them,
       // so stepping through with the arrow keys keeps working.
-      .filter((it) => keepIds.has(it.id) || (!hidden(it.title) && (!hideRead || !it.read)))
+      .filter((it) => keepIds.has(it.id) || (!hidden(it) && (!hideRead || !it.read)))
       .limit(PAGE)
       .toArray();
   }, [view, today, hidden, hideRead, keepIds]);

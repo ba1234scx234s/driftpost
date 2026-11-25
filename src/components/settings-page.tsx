@@ -1,13 +1,15 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { MonitorIcon, MoonIcon, PlusIcon, SunIcon, XIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, MonitorIcon, MoonIcon, PlusIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { TOPIC_IDS, TOPICS, type TopicId } from "@/lib/topics";
 import { FontPicker } from "@/components/font-picker";
 import {
   normaliseKeyword,
@@ -107,9 +109,14 @@ export function SettingsPage() {
 
         <Section
           title="Filters"
-          description="Posts with one of these words in the title are hidden from every list. Whole words only, upper or lower case doesn't matter."
+          description="Hidden posts don't show in any list and don't count as unread."
         >
-          <KeywordFilters keywords={settings.keywords} />
+          <TopicFilters hidden={settings.hiddenTopics} />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="keyword">Words in the title</Label>
+            <p className="text-muted-foreground -mt-1 text-xs">Whole words only, upper or lower case doesn't matter.</p>
+            <KeywordFilters keywords={settings.keywords} />
+          </div>
         </Section>
       </div>
     </ScrollArea>
@@ -143,6 +150,39 @@ function ThemePicker() {
   );
 }
 
+function TopicFilters({ hidden }: { hidden: TopicId[] }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label>Topics</Label>
+      <p className="text-muted-foreground -mt-1 text-xs">
+        Worked out from the tags feeds give their posts and words in the link, like /sport/. Posts without those clues
+        aren't sorted yet.
+      </p>
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Topics to hide">
+        {TOPIC_IDS.map((id) => {
+          const isHidden = hidden.includes(id);
+          return (
+            <Toggle
+              key={id}
+              variant="outline"
+              size="sm"
+              pressed={isHidden}
+              onPressedChange={(on) =>
+                void updateSettings({ hiddenTopics: on ? [...hidden, id] : hidden.filter((t) => t !== id) })
+              }
+              aria-label={`Hide ${TOPICS[id].label}`}
+              className="data-[state=on]:bg-destructive/10 data-[state=on]:text-destructive data-[state=on]:border-destructive/40"
+            >
+              {isHidden ? <EyeOffIcon /> : <EyeIcon />}
+              {TOPICS[id].label}
+            </Toggle>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function KeywordFilters({ keywords }: { keywords: string[] }) {
   const [draft, setDraft] = useState("");
   const word = normaliseKeyword(draft);
@@ -162,6 +202,7 @@ function KeywordFilters({ keywords }: { keywords: string[] }) {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Add a word, e.g. crypto"
+          id="keyword"
           aria-label="Keyword to filter out"
           autoComplete="off"
           maxLength={60}

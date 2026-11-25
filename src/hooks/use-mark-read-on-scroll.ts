@@ -29,9 +29,17 @@ export function useMarkReadOnScroll(
       pending.clear();
     };
 
+    // The observer reports every row once when it starts watching. Rows that are already
+    // above the top at that moment weren't scrolled past while you watched (for example
+    // after the list re-renders), so the first report of each row is ignored.
+    const seen = new WeakSet<Element>();
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
+          const first = !seen.has(entry.target);
+          seen.add(entry.target);
+          if (first) continue;
           const top = entry.rootBounds?.top ?? root.getBoundingClientRect().top;
           // Left the view through the top: scrolled past.
           if (!entry.isIntersecting && entry.boundingClientRect.bottom <= top + 1) {

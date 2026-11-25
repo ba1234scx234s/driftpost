@@ -9,6 +9,8 @@ export interface ParsedItem {
   summary?: string;
   content?: string;
   image?: string;
+  /** The feed's own labels for the post ("Sport", "AFL"…), used to work out its topic. */
+  categories?: string[];
 }
 
 export interface ParsedFeed {
@@ -84,6 +86,7 @@ function parseRss(root: Element, feedUrl: string): ParsedFeed {
         summary: description,
         content: encoded || description,
         image: mediaImage(el, feedUrl),
+        categories: [...children(el, "category"), ...children(el, "subject")].map((c) => textOf(c)),
       });
     }),
   };
@@ -110,6 +113,7 @@ function parseAtom(root: Element, feedUrl: string): ParsedFeed {
         summary: summary || content,
         content: content || summary,
         image: mediaImage(el, feedUrl),
+        categories: children(el, "category").map((c) => c.getAttribute("label") || c.getAttribute("term") || ""),
       });
     }),
   };
@@ -163,6 +167,7 @@ interface JsonFeedItem {
   date_modified?: string;
   author?: { name?: string };
   authors?: { name?: string }[];
+  tags?: string[];
 }
 
 function parseJsonFeed(text: string, feedUrl: string): ParsedFeed {
@@ -189,6 +194,7 @@ function parseJsonFeed(text: string, feedUrl: string): ParsedFeed {
         summary: it.summary || content,
         content: content || it.summary,
         image: resolve(it.image || it.banner_image, feedUrl),
+        categories: Array.isArray(it.tags) ? it.tags.filter((t) => typeof t === "string") : [],
       });
     }),
   };
@@ -205,6 +211,7 @@ function finishItem(item: {
   summary?: string;
   content?: string;
   image?: string;
+  categories?: string[];
 }): ParsedItem {
   const summaryText = item.summary ? htmlToText(item.summary) : "";
   const title = item.title ? htmlToText(item.title) : summaryText.slice(0, 80) || "Untitled";
@@ -217,7 +224,13 @@ function finishItem(item: {
     summary: summaryText ? truncate(summaryText, 300) : undefined,
     content: item.content || undefined,
     image: item.image || firstImage(item.content, item.link),
+    categories: cleanCategories(item.categories),
   };
+}
+
+function cleanCategories(list: string[] | undefined): string[] | undefined {
+  const out = [...new Set((list ?? []).map((c) => c.replace(/\s+/g, " ").trim()).filter((c) => c && c.length <= 80))];
+  return out.length ? out.slice(0, 20) : undefined;
 }
 
 function children(el: Element | undefined, name: string): Element[] {

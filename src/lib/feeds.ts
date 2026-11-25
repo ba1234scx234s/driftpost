@@ -5,6 +5,7 @@ import { AlreadyFollowingError, discoverFeed, type FindKnown } from "./discover"
 import { feedKey } from "./url";
 import { buildOpml, OpmlError, parseOpml } from "./opml";
 import { parseFeed, type ParsedFeed } from "./parse";
+import type { FilterablePost } from "./settings";
 import { startOfToday, type View } from "./views";
 import { fetchViaProxy } from "./proxy";
 
@@ -95,19 +96,19 @@ export async function refreshFeed(feed: Feed): Promise<number> {
  * Unread items in a view: everything, today's posts, or one feed.
  * `hidden` is the keyword filter; posts it hides don't count.
  */
-export function unreadInView(view: View, hidden: (title: string) => boolean = () => false) {
+export function unreadInView(view: View, hidden: (post: FilterablePost) => boolean = () => false) {
   const since = view === "today" ? startOfToday() : 0;
   return db.items
     .where("read")
     .equals(0)
     .filter(
       (it) =>
-        (view === "all" || (view === "today" ? it.published >= since : it.feedId === view)) && !hidden(it.title),
+        (view === "all" || (view === "today" ? it.published >= since : it.feedId === view)) && !hidden(it),
     );
 }
 
 /** Marks every visible unread item in the view as read. Returns their ids so it can be undone. */
-export async function markAllRead(view: View, hidden?: (title: string) => boolean): Promise<number[]> {
+export async function markAllRead(view: View, hidden?: (post: FilterablePost) => boolean): Promise<number[]> {
   return db.transaction("rw", db.items, async () => {
     const ids = (await unreadInView(view, hidden).primaryKeys()) as number[];
     await db.items.bulkUpdate(ids.map((key) => ({ key, changes: { read: 1 as const } })));
@@ -258,6 +259,12 @@ async function storeItems(feedId: number, feed: ParsedFeed, now: number): Promis
       .toArray();
     const knownGuids = new Set(known.map((k) => k.guid));
 
+    // Posts saved before tags were kept: add the feed's tags to them now.
+    const backfill = known
+      .filter((k) => !k.categories && byGuid.get(k.guid)?.categories)
+      .map((k) => ({ key: k.id, changes: { categories: byGuid.get(k.guid)!.categories } }));
+    if (backfill.length) await db.items.bulkUpdate(backfill);
+
     const fresh = guids
       .filter((g) => !knownGuids.has(g))
       .map((g, i) => {
@@ -273,6 +280,7 @@ async function storeItems(feedId: number, feed: ParsedFeed, now: number): Promis
           summary: it.summary,
           content: it.content,
           image: it.image,
+          categories: it.categories,
           read: 0,
           starred: 0,
           addedAt: now,

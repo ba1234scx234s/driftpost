@@ -9,11 +9,13 @@ import {
   Loader2Icon,
   XIcon,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { loadFullArticle, sanitiseArticle, shouldLoadFullText } from "@/lib/article";
 import { db, type Feed, type Item } from "@/lib/db";
+import { detectTopics, TOPICS } from "@/lib/topics";
 
 interface Props {
   item: Item;
@@ -116,6 +118,7 @@ function ArticleView({ item, live, feed }: { item: Item; live: Item; feed: Feed 
         <time dateTime={date.toISOString()} className="text-muted-foreground mt-2 block text-sm">
           {date.toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" })}
         </time>
+        <PostTags item={live} />
 
         {full === "loading" && (
           <p className="text-muted-foreground mt-6 flex items-center gap-2 text-sm">
@@ -140,6 +143,29 @@ function ArticleView({ item, live, feed }: { item: Item; live: Item; feed: Feed 
         />
       </article>
     </ScrollArea>
+  );
+}
+
+/** The feed's tags for the post, and the topic Driftpost worked out from them and the link. */
+function PostTags({ item }: { item: Item }) {
+  const topics = detectTopics(item);
+  // Skip tags that just repeat a topic badge ("Sport" next to Sport).
+  const topicLabels = new Set(topics.map((t) => TOPICS[t].label.toLowerCase()));
+  const tags = (item.categories ?? []).filter((tag) => !topicLabels.has(tag.toLowerCase()));
+  if (!topics.length && !tags.length) return null;
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-1.5" aria-label="Tags">
+      {topics.map((t) => (
+        <Badge key={t} title="Topic, worked out from the tags and link">
+          {TOPICS[t].label}
+        </Badge>
+      ))}
+      {tags.map((tag) => (
+        <Badge key={tag} variant="outline" className="text-muted-foreground font-normal">
+          {tag}
+        </Badge>
+      ))}
+    </div>
   );
 }
 

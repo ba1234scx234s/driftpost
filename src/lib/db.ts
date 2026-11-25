@@ -27,6 +27,8 @@ export interface Item {
   published: number;
   summary?: string;
   content?: string;
+  /** The feed's own labels for the post ("Sport", "AFL"…). */
+  categories?: string[];
   /** Full article text pulled from the web page, when the feed only had a summary. */
   fullContent?: string;
   image?: string;
@@ -55,6 +57,21 @@ db.version(1).stores({
 db.version(2).stores({
   settings: "key",
 });
+
+// Tags (categories) started being kept in version 3. Forget each feed's "not modified"
+// markers once, so the next refresh downloads every feed in full and tags existing posts.
+db.version(3)
+  .stores({})
+  .upgrade((tx) =>
+    tx
+      .table("feeds")
+      .toCollection()
+      .modify((f) => {
+        delete f.etag;
+        delete f.lastModified;
+        f.lastFetched = 0;
+      }),
+  );
 
 /** Ask the browser not to clear our data under storage pressure. */
 export async function requestPersistence(): Promise<void> {

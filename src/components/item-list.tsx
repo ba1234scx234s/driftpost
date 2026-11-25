@@ -54,7 +54,8 @@ export function ItemList({ view, items, selectedId, onSelect, compact, onScrolle
   }
 
   return (
-    <ScrollArea className="min-h-0 flex-1">
+    // A new list starts at the top, not where the previous list was scrolled to.
+    <ScrollArea key={String(view)} className="min-h-0 flex-1">
       <ol ref={listRef} className={cn("mx-auto flex flex-col py-2", compact ? "px-2" : "max-w-2xl px-4 sm:px-6")}>
         {items.map((item) => (
           <ItemRow

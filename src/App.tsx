@@ -18,7 +18,7 @@ import { useVisibleItems } from "@/hooks/use-visible-items";
 import { db, requestPersistence, type Item } from "@/lib/db";
 import { markAllRead, markUnread, unreadInView } from "@/lib/feeds";
 import { fontStack, googleFamily, loadGoogleFont } from "@/lib/fonts";
-import { makeTitleFilter, SIZES, useSettings } from "@/lib/settings";
+import { makePostFilter, SIZES, useSettings } from "@/lib/settings";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import type { Screen } from "@/lib/views";
@@ -31,7 +31,10 @@ export default function App() {
   const [keepIds, setKeepIds] = useState<ReadonlySet<number>>(new Set());
   const { refreshing, refreshNow } = useAutoRefresh();
   const settings = useSettings();
-  const hidden = useMemo(() => makeTitleFilter(settings.keywords), [settings.keywords]);
+  const hidden = useMemo(
+    () => makePostFilter(settings.keywords, settings.hiddenTopics),
+    [settings.keywords, settings.hiddenTopics],
+  );
 
   const feeds = useLiveQuery(() => db.feeds.toArray(), []);
   const selectedFeed = typeof screen === "number" ? feeds?.find((f) => f.id === screen) : undefined;

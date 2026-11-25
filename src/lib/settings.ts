@@ -1,7 +1,8 @@
 // Reader preferences, stored locally in IndexedDB. Theme lives in next-themes (localStorage).
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "./db";
+import { db, type Item } from "./db";
+import { detectTopics, type TopicId } from "./topics";
 
 /** A built-in font id ("geist", "serif"…) or a Google font as "g:Family Name". See fonts.ts. */
 export type FontId = string;
@@ -19,6 +20,8 @@ export interface Settings {
   size: SizeId;
   /** Posts whose title contains one of these words are hidden. */
   keywords: string[];
+  /** Posts about these topics are hidden (see topics.ts). */
+  hiddenTopics: TopicId[];
   /** Only show unread posts in lists. */
   hideRead: boolean;
   /** Mark posts read when they scroll up past the top of the list. */
@@ -41,6 +44,7 @@ export const DEFAULT_SETTINGS: Settings = {
   font: "geist",
   size: "m",
   keywords: [],
+  hiddenTopics: [],
   hideRead: false,
   markReadOnScroll: true,
   showThumbnails: true,
@@ -84,4 +88,18 @@ export function makeTitleFilter(keywords: string[]): (title: string) => boolean 
   const escaped = words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
   const re = new RegExp(`(?<![\\p{L}\\p{N}])(?:${escaped.join("|")})(?![\\p{L}\\p{N}])`, "iu");
   return (title) => re.test(title);
+}
+
+/** The post fields the filters look at. */
+export type FilterablePost = Pick<Item, "title" | "categories" | "link">;
+
+/**
+ * One check for everything Filters hides: keyword matches in the title and hidden topics.
+ * Returns true when the post should be hidden.
+ */
+export function makePostFilter(keywords: string[], hiddenTopics: TopicId[]): (post: FilterablePost) => boolean {
+  const titleHidden = makeTitleFilter(keywords);
+  const topics = new Set(hiddenTopics);
+  if (!topics.size) return (post) => titleHidden(post.title);
+  return (post) => titleHidden(post.title) || detectTopics(post).some((t) => topics.has(t));
 }
