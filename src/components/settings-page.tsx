@@ -304,7 +304,7 @@ function About() {
   const link = "text-foreground inline-flex items-center gap-1.5 underline underline-offset-4";
   return (
     <div className="text-muted-foreground flex flex-col gap-3 text-sm">
-      <p>Driftpost {__APP_VERSION__}. Free to use, and the code is public on GitHub.</p>
+      <p>Driftpost {__APP_VERSION__}. Free and open source under the MIT licence.</p>
       <div className="flex flex-wrap gap-x-6 gap-y-2">
         <a href={`${REPO_URL}/releases`} target="_blank" rel="noreferrer" className={link}>
           <SparklesIcon className="size-4" aria-hidden />

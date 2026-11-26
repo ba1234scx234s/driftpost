@@ -73,3 +73,7 @@ npm install
 npm run dev      # app and Worker together on http://localhost:5173
 npm run deploy   # type-check, build and deploy to Cloudflare
 ```
+
+## Licence
+
+[MIT](LICENSE): free to use, change and share, including commercially, as long as the copyright notice stays in.
