@@ -325,7 +325,7 @@ function About() {
           <CodeIcon className="size-4" aria-hidden />
           Source code on GitHub
         </a>
-        <a href={`${REPO_URL}/issues/new`} target="_blank" rel="noreferrer" className={link}>
+        <a href={`${REPO_URL}/issues`} target="_blank" rel="noreferrer" className={link}>
           <MessageSquareWarningIcon className="size-4" aria-hidden />
           Report a problem or idea
         </a>
