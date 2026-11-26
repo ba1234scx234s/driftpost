@@ -139,6 +139,10 @@ export function SettingsPage() {
         >
           <BackupSection />
         </Section>
+        <Separator />
+        <Section title="Privacy">
+          <PrivacyNote />
+        </Section>
       </div>
     </ScrollArea>
   );
@@ -285,6 +289,34 @@ function KeywordFilters({ keywords }: { keywords: string[] }) {
         </ul>
       ) : (
         <p className="text-muted-foreground text-sm">No filters yet.</p>
+      )}
+    </div>
+  );
+}
+
+/** Where "Report a problem" goes. Empty hides the link. */
+const REPORT_URL = "";
+
+function PrivacyNote() {
+  return (
+    <div className="text-muted-foreground flex max-w-prose flex-col gap-3 text-sm">
+      <p>
+        There are no accounts, ads or tracking. Your feeds, posts, read status and settings are stored only in
+        this browser, and nobody else can see them.
+      </p>
+      <p>
+        Most sites don't let browsers read their feeds directly, so Driftpost's server fetches feeds, article
+        pages and site icons for you. It saves nothing about who asked. Recently fetched feeds are kept for a
+        few minutes so they can be shared with other readers, and the number of requests from each internet
+        address is counted briefly to stop misuse.
+      </p>
+      <p>Articles belong to the sites that publish them. Driftpost shows them for personal reading only.</p>
+      {REPORT_URL && (
+        <p>
+          <a href={REPORT_URL} target="_blank" rel="noreferrer" className="text-foreground underline underline-offset-4">
+            Report a problem
+          </a>
+        </p>
       )}
     </div>
   );

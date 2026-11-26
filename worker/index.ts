@@ -2,25 +2,119 @@
 // The proxy exists only because browsers block most cross-site feed requests (CORS).
 // It stores and logs nothing; all reader data stays in the user's browser.
 
+interface Limiter {
+  limit(opts: { key: string }): Promise<{ success: boolean }>;
+}
+
 interface Env {
   ASSETS: Fetcher;
+  /** Per-IP limits on requests that reach other sites (see wrangler.jsonc). */
+  FETCH_LIMIT?: Limiter;
+  ICON_LIMIT?: Limiter;
 }
+
+/** How long a fetched feed or page is shared between everyone who asks for it. */
+const SHARED_TTL_S = 600;
+/** Only text a reader needs: feeds, web pages and JSON. No images, video or downloads. */
+const TEXT_TYPES = /^(text\/|application\/([\w.+-]+\+)?(xml|json)\b|application\/(rss|atom|rdf|feed)\b)/i;
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const TIMEOUT_MS = 15_000;
 const USER_AGENT = "Driftpost/0.1 (feed reader; +https://github.com/ba1234scx234s/driftpost)";
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname === "/api/fetch") return proxy(request, url);
-    if (url.pathname === "/api/icon") return icon(request, url);
+    if (url.pathname === "/api/fetch") return proxy(request, url, env, ctx);
+    if (url.pathname === "/api/icon") return icon(request, url, env);
     if (url.pathname.startsWith("/api/")) return text("Not found", 404);
     return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;
 
-async function proxy(request: Request, url: URL): Promise<Response> {
+/** True when this visitor has made too many requests to other sites in the last minute. */
+async function overLimit(limiter: Limiter | undefined, request: Request): Promise<boolean> {
+  if (!limiter) return false;
+  const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
+  try {
+    return !(await limiter.limit({ key: ip })).success;
+  } catch {
+    return false; // never block readers because the limiter itself failed
+  }
+}
+
+const TOO_MANY = "Too many requests. Wait a minute and try again.";
+
+// Shared cache of fetched feeds and pages: Cloudflare's cache where it's available (custom
+// domains), plus a small in-memory copy per Worker instance (works on workers.dev too).
+interface Cached {
+  body: ArrayBuffer;
+  headers: [string, string][];
+  expires: number;
+}
+const memory = new Map<string, Cached>();
+const MEMORY_MAX_BYTES = 24 * 1024 * 1024;
+let memoryBytes = 0;
+
+function cacheKey(target: URL): Request {
+  return new Request(`https://cache.driftpost.invalid/fetch?url=${encodeURIComponent(target.toString())}`);
+}
+
+async function readShared(target: URL): Promise<Cached | null> {
+  const key = target.toString();
+  const hit = memory.get(key);
+  if (hit && hit.expires > Date.now()) return hit;
+  if (hit) forget(key);
+  try {
+    const res = await caches.default.match(cacheKey(target));
+    if (!res) return null;
+    const expires = Number(res.headers.get("X-Expires") ?? 0);
+    if (expires <= Date.now()) return null;
+    return { body: await res.arrayBuffer(), headers: [...res.headers], expires };
+  } catch {
+    return null;
+  }
+}
+
+function writeShared(target: URL, entry: Cached, ctx: ExecutionContext): void {
+  const key = target.toString();
+  forget(key);
+  if (entry.body.byteLength < MEMORY_MAX_BYTES / 8) {
+    memory.set(key, entry);
+    memoryBytes += entry.body.byteLength;
+    // Drop the oldest entries once over budget (a Map keeps insertion order).
+    for (const [k] of memory) {
+      if (memoryBytes <= MEMORY_MAX_BYTES) break;
+      forget(k);
+    }
+  }
+  const headers = new Headers(entry.headers);
+  headers.set("X-Expires", String(entry.expires));
+  headers.set("Cache-Control", `public, max-age=${SHARED_TTL_S}`);
+  ctx.waitUntil(caches.default.put(cacheKey(target), new Response(entry.body, { headers })).catch(() => {}));
+}
+
+function forget(key: string): void {
+  const old = memory.get(key);
+  if (!old) return;
+  memoryBytes -= old.body.byteLength;
+  memory.delete(key);
+}
+
+function fromShared(hit: Cached, etag: string | null): Response {
+  const out = new Headers(hit.headers);
+  out.delete("X-Expires");
+  out.set("Cache-Control", "no-store");
+  out.set("X-Driftpost-Cache", "hit");
+  // The reader already has this exact version: answer like the site would.
+  if (etag && out.get("X-ETag") === etag) {
+    out.set("X-Upstream-Status", "304");
+    return new Response(null, { status: 200, headers: out });
+  }
+  return new Response(hit.body, { status: 200, headers: out });
+}
+
+async function proxy(request: Request, url: URL, env: Env, ctx: ExecutionContext): Promise<Response> {
   if (request.method !== "GET") return text("Method not allowed", 405);
 
   // Only serve the Driftpost page itself, so the proxy isn't an open relay for other sites.
@@ -30,13 +124,20 @@ async function proxy(request: Request, url: URL): Promise<Response> {
   const target = parseTarget(url.searchParams.get("url"));
   if (!target) return text("Invalid or disallowed URL", 400);
 
+  const etag = request.headers.get("X-If-None-Match");
+  const modified = request.headers.get("X-If-Modified-Since");
+
+  // Someone fetched this in the last few minutes: share their copy instead of asking the site again.
+  const shared = await readShared(target);
+  if (shared) return fromShared(shared, etag);
+
+  if (await overLimit(env.FETCH_LIMIT, request)) return text(TOO_MANY, 429);
+
   const headers: Record<string, string> = {
     "User-Agent": USER_AGENT,
     Accept:
       "application/rss+xml, application/atom+xml, application/feed+json, application/json, application/xml;q=0.9, text/xml;q=0.9, text/html;q=0.8, */*;q=0.5",
   };
-  const etag = request.headers.get("X-If-None-Match");
-  const modified = request.headers.get("X-If-Modified-Since");
   if (etag) headers["If-None-Match"] = etag;
   if (modified) headers["If-Modified-Since"] = modified;
 
@@ -68,12 +169,23 @@ async function proxy(request: Request, url: URL): Promise<Response> {
 
   if (upstream.status === 304) return new Response(null, { status: 200, headers: out });
 
+  // Text only, so the proxy can't be used to pass images, video or downloads through.
+  const type = upstream.headers.get("Content-Type");
+  if (upstream.ok && type && !TEXT_TYPES.test(type)) {
+    await upstream.body?.cancel();
+    return text("That address isn't a feed or a web page", 415);
+  }
+
   const length = Number(upstream.headers.get("Content-Length") ?? 0);
   if (length > MAX_BYTES) return text("Feed is too large", 413);
 
   const body = await readLimited(upstream);
   if (body === null) return text("Feed is too large", 413);
 
+  if (upstream.status === 200) {
+    writeShared(target, { body: body.slice().buffer as ArrayBuffer, headers: [...out], expires: Date.now() + SHARED_TTL_S * 1000 }, ctx);
+  }
+  out.set("X-Driftpost-Cache", "miss");
   // Always 200 to the app; the real status travels in X-Upstream-Status.
   return new Response(body, { status: 200, headers: out });
 }
@@ -86,12 +198,13 @@ const ICON_TYPES = /^image\/(x-icon|vnd\.microsoft\.icon|png|gif|jpeg|webp|svg\+
  * (to tell whether it needs a light tile in dark mode). Tries /favicon.ico, then the
  * icon the homepage links to.
  */
-async function icon(request: Request, url: URL): Promise<Response> {
+async function icon(request: Request, url: URL, env: Env): Promise<Response> {
   if (request.method !== "GET") return text("Method not allowed", 405);
   const site = request.headers.get("Sec-Fetch-Site");
   if (site && site !== "same-origin") return text("Forbidden", 403);
   const home = parseTarget(`https://${url.searchParams.get("host") ?? ""}/`);
   if (!home || !url.searchParams.get("host")) return text("Invalid or disallowed host", 400);
+  if (await overLimit(env.ICON_LIMIT, request)) return text(TOO_MANY, 429);
 
   const found =
     (await fetchImage(new URL("/favicon.ico", home))) ?? (await fetchImage(await linkedIcon(home)));
