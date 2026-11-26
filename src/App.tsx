@@ -26,11 +26,14 @@ import { lineHeightOf, makePostFilter, SIZES, useSettings } from "@/lib/settings
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import type { Screen, View } from "@/lib/views";
+import { EndCard } from "@/components/end-card";
 
 export default function App() {
   const [screen, setScreenState] = useState<Screen>("all");
   // The article open in the reader column, if any.
   const [selected, setSelected] = useState<Item | null>(null);
+  // Went past the last article: the reader shows the end card instead.
+  const [atEnd, setAtEnd] = useState(false);
   // Posts read while this list is open stay visible even with "hide read posts" on.
   const [keepIds, setKeepIds] = useState<ReadonlySet<number>>(new Set());
   const { refreshing, refreshNow } = useAutoRefresh();
@@ -71,6 +74,7 @@ export default function App() {
   const setScreen = useCallback((next: Screen) => {
     setScreenState(next);
     setSelected(null);
+    setAtEnd(false);
     setKeepIds(new Set());
   }, []);
 
@@ -97,6 +101,7 @@ export default function App() {
   const openItem = useCallback(
     (item: Item) => {
       setSelected(item);
+      setAtEnd(false);
       markRead(item);
       if (openIn === "tab" && item.link) window.open(item.link, "_blank", "noopener,noreferrer");
     },
@@ -125,7 +130,13 @@ export default function App() {
         if (next) {
           e.preventDefault();
           go(next);
+        } else if (selected && readerOpen && !atEnd) {
+          e.preventDefault();
+          setAtEnd(true);
         }
+      } else if (e.key === "ArrowLeft" && atEnd) {
+        e.preventDefault();
+        setAtEnd(false);
       } else if (e.key === "ArrowLeft" && prevItem) {
         e.preventDefault();
         go(prevItem);
@@ -134,11 +145,12 @@ export default function App() {
         openItem(selected);
       } else if (e.key === "Escape" && selected) {
         setSelected(null);
+        setAtEnd(false);
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [screen, selected, items, prevItem, nextItem, openItem, openIn]);
+  }, [screen, selected, items, prevItem, nextItem, openItem, openIn, readerOpen, atEnd]);
 
   useEffect(() => {
     void requestPersistence();
@@ -349,9 +361,28 @@ export default function App() {
         {readerOpen && selected && (
           <Reader
             item={selected}
-            onClose={() => setSelected(null)}
-            onPrev={prevItem && (() => openItem(prevItem))}
-            onNext={nextItem && (() => openItem(nextItem))}
+            onClose={() => {
+              setSelected(null);
+              setAtEnd(false);
+            }}
+            onPrev={atEnd ? () => setAtEnd(false) : prevItem && (() => openItem(prevItem))}
+            onNext={atEnd ? undefined : nextItem ? () => openItem(nextItem) : () => setAtEnd(true)}
+            end={
+              atEnd ? (
+                <EndCard
+                  view={view ?? "all"}
+                  hidden={hidden}
+                  onOpen={(feedId, item) => {
+                    setScreen(feedId);
+                    openItem(item);
+                  }}
+                  onBackToList={() => {
+                    setSelected(null);
+                    setAtEnd(false);
+                  }}
+                />
+              ) : undefined
+            }
           />
         )}
       </main>

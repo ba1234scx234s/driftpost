@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { db, type Feed, type Item } from "@/lib/db";
 import { cachedIconColor, dotColor, iconHost, loadIconColor } from "@/lib/icon-color";
 import { useSettings } from "@/lib/settings";
+import { KofiNote } from "@/components/kofi-note";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import type { View } from "@/lib/views";
@@ -49,7 +50,7 @@ export function ItemList({ view, items, selectedId, onSelect, compact, onScrolle
     return (
       <div className="text-muted-foreground flex flex-1 items-center justify-center p-8 text-center text-sm">
         {hideRead
-          ? "You're all caught up."
+          ? <CaughtUp key={String(view)} />
           : view === "today"
             ? "Nothing new today yet. Posts from today drift in as your feeds update."
             : "Nothing here yet. New posts drift in as your feeds update."}
@@ -190,4 +191,14 @@ function useDotColors(feeds: Feed[] | undefined, enabled: boolean): Map<number, 
     if (color) colors.set(feed.id, dotColor(color, resolvedTheme === "dark"));
   }
   return colors;
+}
+
+/** "You're all caught up", and every 5th time a quiet Ko-fi prompt under it. */
+function CaughtUp() {
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <p>You're all caught up.</p>
+      <KofiNote />
+    </div>
+  );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { PostTags } from "@/components/post-tags";
 import { SelectionFilter } from "@/components/selection-filter";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -22,10 +22,12 @@ interface Props {
   onClose: () => void;
   onPrev?: () => void;
   onNext?: () => void;
+  /** Shown instead of the article: the card after the last one in the list. */
+  end?: ReactNode;
 }
 
 /** The third column: one article, shown in the app. */
-export function Reader({ item, onClose, onPrev, onNext }: Props) {
+export function Reader({ item, onClose, onPrev, onNext, end }: Props) {
   const feed = useLiveQuery(() => db.feeds.get(item.feedId), [item.feedId]);
   // Read the live row so a fetched full text shows as soon as it's saved. While the
   // query for a newly opened article is loading it still returns the previous row,
@@ -49,7 +51,7 @@ export function Reader({ item, onClose, onPrev, onNext }: Props) {
           <ChevronRightIcon />
         </NavButton>
         <div className="ml-auto flex items-center gap-1">
-          {live.link && (
+          {live.link && !end && (
             <Button variant="ghost" size="sm" asChild>
               <a href={live.link} target="_blank" rel="noopener noreferrer">
                 <ExternalLinkIcon />
@@ -75,7 +77,7 @@ export function Reader({ item, onClose, onPrev, onNext }: Props) {
       </header>
 
       <div ref={swipeArea} className="flex min-h-0 flex-1 flex-col">
-        <ArticleView key={live.id} item={item} live={live} feed={feed} />
+        {end ?? <ArticleView key={live.id} item={item} live={live} feed={feed} />}
       </div>
     </section>
   );

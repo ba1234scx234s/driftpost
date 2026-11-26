@@ -2,6 +2,22 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.12.0 (27 November 2026)
+
+### New
+- Going past the last article (→, the next button or a swipe) shows an end card instead of doing nothing. It says how many unread posts are still further up, offers the next feed with unread posts (opening its newest one), and has a way back to the list. ← returns to the last article.
+
+### Changed
+- The welcome screen adds two points: no algorithm, and no AI agents or anything that learns from you.
+
+## 0.11.0 (27 November 2026)
+
+### New
+- Every 5th time you see "You're all caught up", a short note asks if you'd like to buy me an iced coffee on Ko-fi. After you follow the link, it doesn't ask again for 180 days.
+
+### Changed
+- The Ko-fi link in Settings → About now reads "Buy me an iced coffee on Ko-fi".
+
 ## 0.10.0 (27 November 2026)
 
 ### New

@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from "react";
-import { BookOpenIcon, CompassIcon, EyeOffIcon, HardDriveIcon, UserRoundXIcon } from "lucide-react";
+import { BookOpenIcon, BotOffIcon, CompassIcon, EyeOffIcon, HardDriveIcon, ListOrderedIcon, UserRoundXIcon } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -18,7 +18,17 @@ const POINTS: { icon: ComponentType<SVGProps<SVGSVGElement>>; title: string; tex
   {
     icon: EyeOffIcon,
     title: "No ads, no tracking",
-    text: "Just the posts from the sites you choose, newest first.",
+    text: "Nobody watches what you read, and nothing on the page is trying to sell you something.",
+  },
+  {
+    icon: ListOrderedIcon,
+    title: "No algorithm",
+    text: "Just the posts from the sites you choose, newest first. Nothing is ranked, boosted or buried.",
+  },
+  {
+    icon: BotOffIcon,
+    title: "No AI that learns from you",
+    text: "No AI agents, and nothing that learns from what you read or builds a profile of you.",
   },
   {
     icon: BookOpenIcon,

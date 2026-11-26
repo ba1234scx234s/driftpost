@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, CodeIcon, CoffeeIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, MessageSquareWarningIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
+import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, CodeIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, MessageSquareWarningIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { KOFI_URL } from "@/lib/kofi";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -455,9 +456,9 @@ function About() {
           <MessageSquareWarningIcon className="size-4" aria-hidden />
           Report a problem or idea
         </a>
-        <a href="https://ko-fi.com/driftpost#checkoutModal" target="_blank" rel="noreferrer" className={link}>
-          <CoffeeIcon className="size-4" aria-hidden />
-          Buy me a coffee on Ko-fi
+        <a href={KOFI_URL} target="_blank" rel="noreferrer" className={link}>
+          <CupSodaIcon className="size-4" aria-hidden />
+          Buy me an iced coffee on Ko-fi
         </a>
       </div>
       <p className="flex items-center gap-1">
