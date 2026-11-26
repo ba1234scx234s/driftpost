@@ -2,6 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "driftpost",
   "main": "worker/index.ts",
+  // The Cloudflare account Driftpost is deployed to.
+  "account_id": "3202f1d188981169d5f46ed002c533a6",
   "compatibility_date": "2025-09-01",
   "assets": {
     "not_found_handling": "single-page-application",

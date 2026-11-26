@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && XDG_CONFIG_HOME=$HOME/.config/driftpost-cf wrangler deploy",
+    "cf-login": "XDG_CONFIG_HOME=$HOME/.config/driftpost-cf wrangler login"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
