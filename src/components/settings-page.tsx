@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, CodeIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, MessageSquareWarningIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
+import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, CodeIcon, CoffeeIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, MessageSquareWarningIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -450,6 +450,10 @@ function About() {
         <a href={`${REPO_URL}/issues`} target="_blank" rel="noreferrer" className={link}>
           <MessageSquareWarningIcon className="size-4" aria-hidden />
           Report a problem or idea
+        </a>
+        <a href="https://ko-fi.com/driftpost#checkoutModal" target="_blank" rel="noreferrer" className={link}>
+          <CoffeeIcon className="size-4" aria-hidden />
+          Buy me a coffee on Ko-fi
         </a>
       </div>
       <p className="flex items-center gap-1">
