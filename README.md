@@ -1,6 +1,6 @@
 # Driftpost
 
-A calm feed reader for the blogs, news sites and newsletters you like, all in one list.
+A calm feed reader for blogs and news sites, all in one list.
 
 **No account, no login, nothing saved on a server.** Your feeds, read status and settings live only in your own browser.
 

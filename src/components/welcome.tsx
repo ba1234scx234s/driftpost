@@ -36,7 +36,7 @@ export function Welcome({ onDiscover, onSettings }: { onDiscover: () => void; on
           <Logo className="size-10" aria-hidden title="" />
           <h2 className="font-heading text-2xl font-semibold tracking-tight">Welcome to Driftpost</h2>
           <p className="text-muted-foreground">
-            A calm reader for the blogs, news sites and newsletters you like, all in one list.
+            A calm reader for blogs and news sites, all in one list.
           </p>
         </div>
 
