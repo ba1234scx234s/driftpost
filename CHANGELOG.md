@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.5.3 (26 November 2026)
+
+### Changed
+- Driftpost has its own address: https://driftpost.app
+
 ## 0.5.2 (26 November 2026)
 
 ### Changed
@@ -21,7 +26,7 @@ What's new in each version of Driftpost. Each version is also a [release on GitH
 
 ### Changed
 - Read posts are hidden by default. You can show them again in Settings → Reading.
-- Driftpost has moved to a new address: https://driftpost.cloudflare-constrain275-202.workers.dev
+- Driftpost has moved to a new address.
 - The server that fetches feeds now shares recently fetched feeds between readers for 10 minutes, only passes on feeds and web pages, and limits requests per visitor to stop misuse.
 - Settings explains what is and isn't stored, in a new Privacy section.
 

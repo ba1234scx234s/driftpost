@@ -4,7 +4,7 @@ A calm feed reader for blogs and news sites, all in one list.
 
 **No account, no login, nothing saved on a server.** Your feeds, read status and settings live only in your own browser.
 
-Live: https://driftpost.cloudflare-constrain275-202.workers.dev · [What's new](CHANGELOG.md) · [Releases](https://github.com/ba1234scx234s/driftpost/releases)
+Live: https://driftpost.app · [What's new](CHANGELOG.md) · [Releases](https://github.com/ba1234scx234s/driftpost/releases)
 
 ![Driftpost in light mode: feeds on the left, the post list in the middle and an article open in the reader](docs/screenshots/reader-light.png)
 
