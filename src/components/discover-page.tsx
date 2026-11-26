@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CATALOG, type CatalogFeed } from "@/lib/catalog";
 import { db } from "@/lib/db";
 import { AlreadyFollowingError } from "@/lib/discover";
-import { subscribe } from "@/lib/feeds";
+import { renameFeed, subscribe } from "@/lib/feeds";
 import { feedKey } from "@/lib/url";
 import { cn } from "@/lib/utils";
 
@@ -110,7 +110,10 @@ function FeedCard(props: { feed: CatalogFeed; followedId?: number; onShowFeed: (
     setBusy(true);
     try {
       const added = await subscribe(feed.url);
-      toast.success(`Following ${added.title}`, {
+      // Use Discover's name: feeds often call themselves something vaguer ("BBC News" for
+      // both BBC feeds, "World news | The Guardian").
+      if (feed.title !== added.title) await renameFeed(added.id, feed.title);
+      toast.success(`Following ${feed.title}`, {
         action: { label: "Show", onClick: () => props.onShowFeed(added.id) },
       });
     } catch (err) {

@@ -2,6 +2,28 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.13.2 (27 November 2026)
+
+### Changed
+- Driftpost no longer fetches article pages just to find pictures for the list, to keep requests down. A post without a picture still gets one when you open it and Driftpost loads its full text anyway.
+
+## 0.13.1 (27 November 2026)
+
+### Changed
+- Discover no longer suggests Google News searches (Reuters, AP News and Bloomberg). Feeds you already follow stay.
+- Feeds followed from Discover keep Discover's name, so the two BBC News feeds are told apart ("BBC News" and "BBC News – World").
+
+## 0.13.0 (27 November 2026)
+
+### New
+- Pictures for posts whose feed has none: as posts come into view, Driftpost looks up the article's own preview image (the one sites set for link previews), a few at a time and once per post.
+
+### Changed
+- In lists with pictures, posts without one keep an empty space where it would be, so every row lines up. Text-only feeds keep the full width.
+
+### Fixed
+- Pictures in feeds that list them without a type, like the Guardian's, now show (the largest one is used).
+
 ## 0.12.2 (27 November 2026)
 
 ### Changed

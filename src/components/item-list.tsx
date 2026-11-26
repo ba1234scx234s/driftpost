@@ -31,6 +31,9 @@ export function ItemList({ view, items, selectedId, onSelect, compact, onScrolle
   const feedTitles = feeds && new Map(feeds.map((f) => [f.id, f.title]));
   const dotColors = useDotColors(feeds, colorDots);
   const showFeed = typeof view !== "number";
+  // Keep the picture column for posts without one, so rows line up, but only in lists
+  // that have pictures: text-only blogs keep their full width.
+  const reserveThumbnail = !!items?.some((it) => it.image);
 
   if (!items) {
     return (
@@ -70,6 +73,7 @@ export function ItemList({ view, items, selectedId, onSelect, compact, onScrolle
             dotColor={dotColors.get(item.feedId)}
             showFeed={showFeed}
             showThumbnail={showThumbnails}
+            reserveThumbnail={reserveThumbnail}
             showSummary={showSummaries}
             selected={item.id === selectedId}
             compact={compact}
@@ -86,6 +90,8 @@ function ItemRow(props: {
   feedTitle?: string;
   showFeed: boolean;
   showThumbnail: boolean;
+  /** Leave an empty space where the picture would be. */
+  reserveThumbnail: boolean;
   showSummary: boolean;
   selected: boolean;
   compact: boolean;
@@ -144,17 +150,23 @@ function ItemRow(props: {
             </p>
           )}
         </div>
-        {props.showThumbnail && item.image && (
-          <img
-            src={item.image}
-            alt=""
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            className={cn("bg-muted shrink-0 rounded-md object-cover", compact ? "size-12" : "size-16 sm:size-20")}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          />
+        {props.showThumbnail && (item.image || props.reserveThumbnail) && (
+          <div className={cn("shrink-0", compact ? "size-12" : "size-16 sm:size-20")}>
+            {item.image && (
+              <img
+                key={item.image}
+                src={item.image}
+                alt=""
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                className="bg-muted size-full rounded-md object-cover"
+                onError={(e) => {
+                  // Broken picture: keep the space so the row still lines up.
+                  e.currentTarget.style.visibility = "hidden";
+                }}
+              />
+            )}
+          </div>
         )}
       </button>
     </li>

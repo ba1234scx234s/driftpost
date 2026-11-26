@@ -34,6 +34,8 @@ export interface Item {
   /** Full article text pulled from the web page, when the feed only had a summary. */
   fullContent?: string;
   image?: string;
+  /** 1 once the article page was checked for a preview image (see preview-image.ts). */
+  imageChecked?: 1;
   /** 0 or 1: IndexedDB can't index booleans. */
   read: 0 | 1;
   starred: 0 | 1;

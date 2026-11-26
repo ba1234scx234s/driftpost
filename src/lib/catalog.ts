@@ -23,8 +23,6 @@ export const CATALOG: CatalogCategory[] = [
     feeds: [
       { title: "BBC News", url: "https://feeds.bbci.co.uk/news/rss.xml", site: "https://www.bbc.co.uk/news", about: "Top stories from the BBC" },
       { title: "BBC News – World", url: "https://feeds.bbci.co.uk/news/world/rss.xml", site: "https://www.bbc.co.uk/news", about: "World news from the BBC" },
-      { title: "Reuters", url: "https://news.google.com/rss/search?q=when:24h+site:reuters.com&ceid=US:en&hl=en-US&gl=US", site: "https://www.reuters.com", about: "The last day of Reuters stories, via Google News" },
-      { title: "AP News", url: "https://news.google.com/rss/search?q=when:24h+site:apnews.com&hl=en-US&gl=US&ceid=US:en", site: "https://apnews.com", about: "The last day of AP stories, via Google News" },
       { title: "The Guardian – World", url: "https://www.theguardian.com/world/rss", site: "https://www.theguardian.com", about: "World news from The Guardian" },
       { title: "Al Jazeera English", url: "https://www.aljazeera.com/xml/rss/all.xml", site: "https://www.aljazeera.com", about: "International news" },
       { title: "NPR News", url: "https://feeds.npr.org/1001/rss.xml", site: "https://www.npr.org", about: "US public radio news" },
@@ -123,7 +121,6 @@ export const CATALOG: CatalogCategory[] = [
     id: "business",
     label: "Business",
     feeds: [
-      { title: "Bloomberg", url: "https://news.google.com/rss/search?q=when:24h+site:bloomberg.com&hl=en-US&gl=US&ceid=US:en", site: "https://www.bloomberg.com", about: "The last day of Bloomberg stories, via Google News" },
       { title: "WSJ – Markets", url: "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain", site: "https://www.wsj.com", about: "Markets news from the Journal" },
       { title: "The Economist – World this week", url: "https://www.economist.com/rss/the_world_this_week_rss.xml", site: "https://www.economist.com", about: "The week's news in brief" },
       { title: "The Economist – Finance", url: "https://www.economist.com/finance-and-economics/rss.xml", site: "https://www.economist.com", about: "Finance and economics" },

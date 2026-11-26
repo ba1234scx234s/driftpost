@@ -5,6 +5,7 @@ import { Readability } from "@mozilla/readability";
 import { db, type Feed, type Item } from "./db";
 import { htmlToText } from "./parse";
 import { fetchViaProxy } from "./proxy";
+import { imageFromPage } from "./preview-image";
 
 /** Feed content with at least this much text is treated as the full article. */
 const FULL_TEXT_CHARS = 1500;
@@ -50,6 +51,12 @@ export async function loadFullArticle(item: Item): Promise<string | null> {
 
   const res = await fetchViaProxy(item.link);
   if (!res.contentType.includes("html") && !/<html|<body/i.test(res.text.slice(0, 2000))) return null;
+
+  // The page is here anyway: pick up its preview image for the list if the post has none.
+  if (!item.image && !item.imageChecked) {
+    const image = imageFromPage(res.text, res.finalUrl);
+    await db.items.update(item.id, image ? { image, imageChecked: 1 } : { imageChecked: 1 });
+  }
 
   const doc = new DOMParser().parseFromString(res.text, "text/html");
   // Let Readability turn relative links and images into full addresses.

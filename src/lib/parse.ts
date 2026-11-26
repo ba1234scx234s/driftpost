@@ -252,19 +252,27 @@ function textOf(el: Element | undefined): string {
 }
 
 function mediaImage(el: Element, base: string): string | undefined {
+  // The biggest picture among media:content (some feeds, like the Guardian, give no type
+  // and only a width), else media:thumbnail, else an image enclosure.
+  let best: { url: string; width: number } | undefined;
+  let thumbnail: string | undefined;
+  let enclosure: string | undefined;
   for (const c of Array.from(el.children)) {
-    if (c.namespaceURI === MEDIA_NS && (c.localName === "thumbnail" || c.localName === "content")) {
+    const url = c.getAttribute("url");
+    if (!url) continue;
+    if (c.namespaceURI === MEDIA_NS && c.localName === "content") {
       const medium = c.getAttribute("medium");
       const type = c.getAttribute("type") ?? "";
-      if (c.localName === "thumbnail" || medium === "image" || type.startsWith("image/")) {
-        return resolve(c.getAttribute("url") ?? undefined, base);
-      }
-    }
-    if (c.localName === "enclosure" && (c.getAttribute("type") ?? "").startsWith("image/")) {
-      return resolve(c.getAttribute("url") ?? undefined, base);
+      const image = medium === "image" || type.startsWith("image/") || (!medium && !type);
+      const width = Number(c.getAttribute("width")) || 0;
+      if (image && (!best || width > best.width)) best = { url, width };
+    } else if (c.namespaceURI === MEDIA_NS && c.localName === "thumbnail") {
+      thumbnail ??= url;
+    } else if (c.localName === "enclosure" && (c.getAttribute("type") ?? "").startsWith("image/")) {
+      enclosure ??= url;
     }
   }
-  return undefined;
+  return resolve(best?.url ?? thumbnail ?? enclosure, base);
 }
 
 function firstImage(html: string | undefined, base: string | undefined): string | undefined {
