@@ -135,6 +135,7 @@ export function SettingsPage() {
         </Section>
         <Separator />
         <Section
+          id="import-export"
           title="Import and export"
           description="Move your subscriptions between Driftpost and other feed readers with an OPML file. Only the feeds come along, not posts or settings."
         >
@@ -360,9 +361,19 @@ function PrivacyNote() {
   );
 }
 
-function Section({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+function Section({
+  title,
+  description,
+  id,
+  children,
+}: {
+  title: string;
+  description?: string;
+  id?: string;
+  children: ReactNode;
+}) {
   return (
-    <section className="flex flex-col gap-4">
+    <section id={id} className="flex scroll-mt-6 flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h3 className="font-heading text-base font-semibold">{title}</h3>
         {description && <p className="text-muted-foreground text-sm">{description}</p>}

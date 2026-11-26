@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { CheckCheckIcon, CompassIcon, PlusIcon, RefreshCwIcon, SettingsIcon, XIcon } from "lucide-react";
+import { CheckCheckIcon, CompassIcon, PlusIcon, RefreshCwIcon, SettingsIcon, UploadIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AddFeedForm } from "@/components/add-feed-form";
 import { FeedMenu } from "@/components/feed-menu";
@@ -41,6 +41,17 @@ export default function App() {
   const feeds = useLiveQuery(() => db.feeds.toArray(), []);
   const [addOpen, setAddOpen] = useState(false);
   const addInput = useRef<HTMLInputElement>(null);
+  // Opens Settings scrolled to Import and export.
+  const showImportExport = useCallback(() => {
+    setScreen("settings");
+    let tries = 0;
+    const scroll = () => {
+      const section = document.getElementById("import-export");
+      if (section) section.scrollIntoView({ block: "start" });
+      else if (tries++ < 20) requestAnimationFrame(scroll);
+    };
+    requestAnimationFrame(scroll);
+  }, []);
   // Opening the "follow a site" field puts the cursor in it.
   useEffect(() => {
     if (addOpen) addInput.current?.focus();
@@ -205,12 +216,18 @@ export default function App() {
           )}
           {/* Discover lives with "follow a site": the other way to find something new. */}
           {(addOpen || feeds?.length === 0) && (
-            <div className="-mx-1 -mt-1">
+            <div className="-mx-1 -mt-1 flex flex-col gap-0.5">
               <SidebarRow
                 active={screen === "discover"}
                 onClick={() => setScreen("discover")}
                 icon={<CompassIcon className="size-4" />}
                 label="Discover"
+              />
+              <SidebarRow
+                active={false}
+                onClick={showImportExport}
+                icon={<UploadIcon className="size-4" />}
+                label="Import OPML"
               />
             </div>
           )}

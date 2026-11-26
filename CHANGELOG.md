@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.6.3 (27 November 2026)
+
+### New
+- "Import OPML" under Discover when you press +. It opens Settings at Import and export.
+
 ## 0.6.2 (27 November 2026)
 
 ### Changed
