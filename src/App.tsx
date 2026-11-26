@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { CheckCheckIcon, CompassIcon, PlusIcon, RefreshCwIcon, SettingsIcon, UploadIcon, XIcon } from "lucide-react";
+import { CheckCheckIcon, CompassIcon, MenuIcon, PlusIcon, RefreshCwIcon, SettingsIcon, UploadIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AddFeedForm } from "@/components/add-feed-form";
 import { FeedMenu } from "@/components/feed-menu";
@@ -11,11 +11,13 @@ import { Logo } from "@/components/logo";
 import { DiscoverPage } from "@/components/discover-page";
 import { Welcome } from "@/components/welcome";
 import { BackupReminder } from "@/components/backup-reminder";
-import { SettingsPage } from "@/components/settings-page";
+import { SettingsPage, type SettingsSectionId } from "@/components/settings-page";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useVisibleItems } from "@/hooks/use-visible-items";
 import { db, requestPersistence, type Item } from "@/lib/db";
 import { markAllRead, markUnread, unreadInView } from "@/lib/feeds";
@@ -40,17 +42,20 @@ export default function App() {
 
   const feeds = useLiveQuery(() => db.feeds.toArray(), []);
   const [addOpen, setAddOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const [menuOpen, setMenuOpen] = useState(false);
+  /** Go somewhere from the sidebar; on phones that also closes the menu. */
+  const go = useCallback((next: Screen) => {
+    setScreen(next);
+    setMenuOpen(false);
+  }, []);
   const addInput = useRef<HTMLInputElement>(null);
-  // Opens Settings scrolled to Import and export.
+  // A request to open Settings at one part; n changes so the same part can be asked for again.
+  const [settingsJump, setSettingsJump] = useState<{ section: SettingsSectionId; n: number }>();
+  // Opens Settings at Import and export.
   const showImportExport = useCallback(() => {
+    setSettingsJump((prev) => ({ section: "import-export", n: (prev?.n ?? 0) + 1 }));
     setScreen("settings");
-    let tries = 0;
-    const scroll = () => {
-      const section = document.getElementById("import-export");
-      if (section) section.scrollIntoView({ block: "start" });
-      else if (tries++ < 20) requestAnimationFrame(scroll);
-    };
-    requestAnimationFrame(scroll);
   }, []);
   // Opening the "follow a site" field puts the cursor in it.
   useEffect(() => {
@@ -173,77 +178,99 @@ export default function App() {
         ? "Discover"
         : (selectedFeed?.title ?? (screen === "today" ? "Today" : "All posts"));
 
-  return (
-    <div className="bg-background text-foreground flex h-dvh flex-col md:flex-row">
-      <aside className="bg-sidebar flex max-h-[45dvh] shrink-0 flex-col border-b md:max-h-none md:w-72 md:border-r md:border-b-0">
-        <div className="flex flex-col gap-3 p-3">
-          <div className="flex items-center justify-between">
-            <h1 className="font-heading flex items-center gap-2 px-1 text-lg font-semibold tracking-tight">
-              <Logo className="size-6" aria-hidden title="" />
-              Driftpost
-            </h1>
-            {feeds && feeds.length > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={addOpen ? "Close" : "Follow a site"}
-                    aria-expanded={addOpen}
-                    onClick={() => setAddOpen((open) => !open)}
-                  >
-                    {addOpen ? <XIcon /> : <PlusIcon />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{addOpen ? "Close" : "Follow a site"}</TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-          {/* Always there until you follow something; after that, behind the + button. */}
-          {(addOpen || feeds?.length === 0) && (
-            <AddFeedForm
-              inputRef={addInput}
-              onAdded={(feed) => {
-                setAddOpen(false);
-                setScreen(feed.id);
-              }}
-              onShowFeed={(id) => {
-                setAddOpen(false);
-                setScreen(id);
-              }}
-              onCancel={feeds?.length ? () => setAddOpen(false) : undefined}
-            />
+  // The sidebar: a column on wider screens, a slide-in menu on phones.
+  const sidebar = (
+    <>
+      {/* Same height and padding as the list header next to it, so their bottom lines meet. */}
+      <div className="flex min-h-12 shrink-0 items-center justify-between border-b px-3 py-2.5">
+          <h1 className="font-heading flex items-center gap-2 px-1 text-lg font-semibold tracking-tight">
+            <Logo className="size-6" aria-hidden title="" />
+            Driftpost
+          </h1>
+          {feeds && feeds.length > 0 && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={addOpen ? "Close" : "Follow a site"}
+                  aria-expanded={addOpen}
+                  onClick={() => setAddOpen((open) => !open)}
+                >
+                  {addOpen ? <XIcon /> : <PlusIcon />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{addOpen ? "Close" : "Follow a site"}</TooltipContent>
+            </Tooltip>
           )}
-          {/* Discover lives with "follow a site": the other way to find something new. */}
-          {(addOpen || feeds?.length === 0) && (
-            <div className="-mx-1 -mt-1 flex flex-col gap-0.5">
-              <SidebarRow
-                active={screen === "discover"}
-                onClick={() => setScreen("discover")}
-                icon={<CompassIcon className="size-4" />}
-                label="Discover"
-              />
-              <SidebarRow
-                active={false}
-                onClick={showImportExport}
-                icon={<UploadIcon className="size-4" />}
-                label="Import OPML"
-              />
-            </div>
-          )}
-        </div>
-        <Separator />
-        <FeedSidebar selected={screen} onSelect={setScreen} hidden={hidden} />
-        <Separator />
-        <div className="flex flex-col gap-0.5 p-2">
-          <SidebarRow
-            active={screen === "settings"}
-            onClick={() => setScreen("settings")}
-            icon={<SettingsIcon className="size-4" />}
-            label="Settings"
+      </div>
+      {/* Always there until you follow something; after that, behind the + button. */}
+      {(addOpen || feeds?.length === 0) && (
+        <div className="flex flex-col gap-3 border-b p-3">
+          <AddFeedForm
+            inputRef={addInput}
+            onAdded={(feed) => {
+              setAddOpen(false);
+              go(feed.id);
+            }}
+            onShowFeed={(id) => {
+              setAddOpen(false);
+              go(id);
+            }}
+            onCancel={feeds?.length ? () => setAddOpen(false) : undefined}
           />
+          {/* Discover lives with "follow a site": the other way to find something new. */}
+          <div className="-mx-1 -mt-1 flex flex-col gap-0.5">
+            <SidebarRow
+              active={screen === "discover"}
+              onClick={() => go("discover")}
+              icon={<CompassIcon className="size-4" />}
+              label="Discover"
+            />
+            <SidebarRow
+              active={false}
+              onClick={() => {
+              setMenuOpen(false);
+              showImportExport();
+            }}
+              icon={<UploadIcon className="size-4" />}
+              label="Import OPML"
+            />
+          </div>
         </div>
-      </aside>
+      )}
+      <FeedSidebar selected={screen} onSelect={go} hidden={hidden} />
+      <Separator />
+      <div className="flex flex-col gap-0.5 p-2">
+        <SidebarRow
+          active={screen === "settings"}
+          onClick={() => go("settings")}
+          icon={<SettingsIcon className="size-4" />}
+          label="Settings"
+        />
+      </div>
+    </>
+  );
+
+  return (
+    <div className="bg-background text-foreground flex h-dvh">
+      {isMobile ? (
+        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+          <SheetContent
+            side="left"
+            showCloseButton={false}
+            className="bg-sidebar w-[85vw] max-w-80 gap-0 p-0"
+            // Don't jump focus to the + button (and pop its tooltip) when the menu opens.
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            <SheetTitle className="sr-only">Menu</SheetTitle>
+            <SheetDescription className="sr-only">Your feeds, Discover and Settings</SheetDescription>
+            {sidebar}
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <aside className="bg-sidebar flex w-72 shrink-0 flex-col border-r">{sidebar}</aside>
+      )}
 
       <main className="flex min-h-0 min-w-0 flex-1">
         <div
@@ -255,6 +282,11 @@ export default function App() {
         >
         <header className="flex min-h-12 items-center gap-3 border-b px-4 py-2.5 sm:px-6">
           <div className="flex min-w-0 items-center gap-1">
+            {isMobile && (
+              <Button variant="ghost" size="icon-sm" className="-ml-2" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+                <MenuIcon />
+              </Button>
+            )}
             <h2 className="truncate text-sm font-medium">{title}</h2>
             {selectedFeed && <FeedMenu feed={selectedFeed} onUnfollowed={() => setScreen("all")} />}
           </div>
@@ -293,11 +325,15 @@ export default function App() {
           )}
         </header>
         {screen === "settings" ? (
-          <SettingsPage />
+          <SettingsPage jump={settingsJump} />
         ) : screen === "discover" ? (
           <DiscoverPage onShowFeed={setScreen} />
         ) : feeds && feeds.length === 0 ? (
-          <Welcome onDiscover={() => setScreen("discover")} onSettings={() => setScreen("settings")} />
+          <Welcome
+            onDiscover={() => setScreen("discover")}
+            onSettings={showImportExport}
+            onOpenMenu={isMobile ? () => setMenuOpen(true) : undefined}
+          />
         ) : (
           <ItemList
             view={view ?? "all"}

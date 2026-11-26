@@ -2,6 +2,41 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.9.0 (27 November 2026)
+
+### Changed
+- Settings has a nav beside it (on wider screens) that jumps to each part: Appearance, Reading, Filters, Import and export, Backup, Privacy and About. It highlights the part you're reading. On phones it's still one page to scroll.
+- "Import OPML" in the + menu opens Settings right at Import and export.
+
+### New
+- About says where Driftpost is made: Melbourne, Australia.
+
+## 0.8.0 (27 November 2026)
+
+### New
+- Coloured unread dots: the dot next to an unread post takes the main colour of its feed's icon, so you can tell feeds apart at a glance. Icons without a clear colour keep the usual dot. On by default; turn it off in Settings → Reading.
+
+## 0.7.2 (27 November 2026)
+
+### New
+- On touch screens, swipe an article right-to-left for the next one (like →), or left-to-right for the previous one (like ←).
+
+## 0.7.1 (27 November 2026)
+
+### Fixed
+- The line under the sidebar's logo now lines up with the line under the list's title, at every text size.
+
+### Changed
+- Topics now look exactly like a feed's tags.
+
+## 0.7.0 (27 November 2026)
+
+### Changed
+- On phones, the posts list now fills the screen. Your feeds, the + button and Settings moved into a menu (☰) that slides in from the left and closes when you pick something.
+
+### Fixed
+- Switching lists could mark the posts you were leaving as read.
+
 ## 0.6.3 (27 November 2026)
 
 ### New

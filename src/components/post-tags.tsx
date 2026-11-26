@@ -53,12 +53,9 @@ function HideMenu(props: {
       <DropdownMenuTrigger asChild>
         <Badge
           asChild
-          variant={isTopic ? "default" : "outline"}
-          className={
-            isTopic
-              ? "group cursor-pointer rounded-[0.25rem] px-1.5"
-              : "text-muted-foreground hover:text-foreground group cursor-pointer font-normal"
-          }
+          variant="outline"
+          // Topics and a feed's own tags look the same.
+          className="text-muted-foreground hover:text-foreground group cursor-pointer font-normal"
         >
           <button type="button" title={props.description} aria-label={`${props.label}: hide options`}>
             {props.label}

@@ -34,6 +34,8 @@ export interface Settings {
   showThumbnails: boolean;
   /** Show the short description under each title in lists. */
   showSummaries: boolean;
+  /** Unread dots take the main colour of each feed's icon. */
+  colorDots: boolean;
   /** How an article opens: in Driftpost's reader column, or the website in a new browser tab. */
   openIn: OpenIn;
   /** Every 30 days, ask to download a backup. */
@@ -61,6 +63,7 @@ export const DEFAULT_SETTINGS: Settings = {
   markReadOnScroll: true,
   showThumbnails: true,
   showSummaries: true,
+  colorDots: true,
   openIn: "reader",
   backupReminder: true,
 };

@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMarkReadOnScroll } from "@/hooks/use-mark-read-on-scroll";
 import { Skeleton } from "@/components/ui/skeleton";
-import { db, type Item } from "@/lib/db";
+import { db, type Feed, type Item } from "@/lib/db";
+import { cachedIconColor, dotColor, iconHost, loadIconColor } from "@/lib/icon-color";
 import { useSettings } from "@/lib/settings";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -21,10 +23,12 @@ interface Props {
 }
 
 export function ItemList({ view, items, selectedId, onSelect, compact, onScrolledPast }: Props) {
-  const { hideRead, showThumbnails, showSummaries, markReadOnScroll } = useSettings();
+  const { hideRead, showThumbnails, showSummaries, markReadOnScroll, colorDots } = useSettings();
   const listRef = useRef<HTMLOListElement>(null);
   useMarkReadOnScroll(listRef, items, markReadOnScroll, onScrolledPast);
-  const feedTitles = useLiveQuery(async () => new Map((await db.feeds.toArray()).map((f) => [f.id, f.title])), []);
+  const feeds = useLiveQuery(() => db.feeds.toArray(), []);
+  const feedTitles = feeds && new Map(feeds.map((f) => [f.id, f.title]));
+  const dotColors = useDotColors(feeds, colorDots);
   const showFeed = typeof view !== "number";
 
   if (!items) {
@@ -62,6 +66,7 @@ export function ItemList({ view, items, selectedId, onSelect, compact, onScrolle
             key={item.id}
             item={item}
             feedTitle={feedTitles?.get(item.feedId)}
+            dotColor={dotColors.get(item.feedId)}
             showFeed={showFeed}
             showThumbnail={showThumbnails}
             showSummary={showSummaries}
@@ -83,6 +88,8 @@ function ItemRow(props: {
   showSummary: boolean;
   selected: boolean;
   compact: boolean;
+  /** The unread dot's colour; the default when not set. */
+  dotColor?: string;
   onSelect: () => void;
 }) {
   const { item, feedTitle, showFeed, selected, compact } = props;
@@ -108,7 +115,13 @@ function ItemRow(props: {
       >
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="text-muted-foreground flex items-center gap-2 text-xs">
-            {!item.read && <span className="bg-primary size-1.5 shrink-0 rounded-full" aria-label="Unread" />}
+            {!item.read && (
+              <span
+                className="bg-primary size-1.5 shrink-0 rounded-full"
+                style={props.dotColor ? { backgroundColor: props.dotColor } : undefined}
+                aria-label="Unread"
+              />
+            )}
             {showFeed && feedTitle && <span className="truncate">{feedTitle}</span>}
             {showFeed && feedTitle && <span aria-hidden>·</span>}
             <time dateTime={new Date(item.published).toISOString()} className="shrink-0">
@@ -145,4 +158,36 @@ function ItemRow(props: {
       </button>
     </li>
   );
+}
+
+/**
+ * Each feed's unread-dot colour, from the main colour of its icon (worked out once per site
+ * and remembered). Feeds whose icon has no clear colour keep the default dot.
+ */
+function useDotColors(feeds: Feed[] | undefined, enabled: boolean): Map<number, string> {
+  const { resolvedTheme } = useTheme();
+  const [, setLoaded] = useState(0);
+
+  useEffect(() => {
+    if (!enabled || !feeds) return;
+    let live = true;
+    for (const feed of feeds) {
+      const host = iconHost(feed);
+      if (host && cachedIconColor(host) === undefined) {
+        void loadIconColor(host).then(() => live && setLoaded((n) => n + 1));
+      }
+    }
+    return () => {
+      live = false;
+    };
+  }, [enabled, feeds]);
+
+  const colors = new Map<number, string>();
+  if (!enabled || !feeds) return colors;
+  for (const feed of feeds) {
+    const host = iconHost(feed);
+    const color = host ? cachedIconColor(host) : null;
+    if (color) colors.set(feed.id, dotColor(color, resolvedTheme === "dark"));
+  }
+  return colors;
 }

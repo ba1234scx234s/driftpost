@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { loadFullArticle, sanitiseArticle, shouldLoadFullText } from "@/lib/article";
 import { db, type Feed, type Item } from "@/lib/db";
+import { useSwipe } from "@/hooks/use-swipe";
 
 interface Props {
   item: Item;
@@ -31,6 +32,9 @@ export function Reader({ item, onClose, onPrev, onNext }: Props) {
   // so only trust it when the ids match.
   const row = useLiveQuery(() => db.items.get(item.id), [item.id]);
   const live = row?.id === item.id ? row : item;
+  // On touch screens: swipe right-to-left for the next article (like →), left-to-right for the previous.
+  const swipeArea = useRef<HTMLDivElement>(null);
+  useSwipe(swipeArea, { onLeft: onNext, onRight: onPrev });
 
   return (
     <section className="bg-background flex min-h-0 min-w-0 flex-1 flex-col" aria-label="Article">
@@ -70,7 +74,9 @@ export function Reader({ item, onClose, onPrev, onNext }: Props) {
         </div>
       </header>
 
-      <ArticleView key={live.id} item={item} live={live} feed={feed} />
+      <div ref={swipeArea} className="flex min-h-0 flex-1 flex-col">
+        <ArticleView key={live.id} item={item} live={live} feed={feed} />
+      </div>
     </section>
   );
 }

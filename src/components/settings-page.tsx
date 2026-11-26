@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { CodeIcon, EyeIcon, MessageSquareWarningIcon, EyeOffIcon, MonitorIcon, MoonIcon, PlusIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
+import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, CodeIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, MessageSquareWarningIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,151 +25,263 @@ import {
   type SizeId,
 } from "@/lib/settings";
 
-export function SettingsPage() {
+/** The parts of Settings, in the order the side nav lists them. */
+export const SETTINGS_SECTIONS = [
+  { id: "appearance", label: "Appearance", icon: PaletteIcon },
+  { id: "reading", label: "Reading", icon: BookOpenIcon },
+  { id: "filters", label: "Filters", icon: FilterIcon },
+  { id: "import-export", label: "Import and export", icon: ArrowDownUpIcon },
+  { id: "backup", label: "Backup", icon: ArchiveIcon },
+  { id: "privacy", label: "Privacy", icon: ShieldIcon },
+  { id: "about", label: "About", icon: InfoIcon },
+] as const;
+export type SettingsSectionId = (typeof SETTINGS_SECTIONS)[number]["id"];
+
+let lastJump = 0;
+
+/**
+ * Settings as one long page. On wider screens a nav beside it jumps to each part and
+ * highlights the one you're reading; phones just scroll.
+ */
+export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n: number } }) {
   const settings = useSettings();
 
+  const content: Record<SettingsSectionId, ReactNode> = {
+    "appearance": (
+      <Section title="Appearance">
+        <Row label="Theme" htmlFor="theme">
+          <ThemePicker />
+        </Row>
+        <FontPicker font={settings.font} />
+        <Row label="Text size" htmlFor="size">
+          <ToggleGroup
+            id="size"
+            type="single"
+            variant="outline"
+            value={settings.size}
+            onValueChange={(size) => size && void updateSettings({ size: size as SizeId })}
+          >
+            {Object.entries(SIZES).map(([id, s]) => (
+              <ToggleGroupItem key={id} value={id} aria-label={s.name} className="px-3">
+                {s.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </Row>
+      </Section>
+    ),
+    "reading": (
+      <Section title="Reading">
+        <Row label="Open articles" htmlFor="open-in" hint={OPEN_IN[settings.openIn].hint}>
+          <ToggleGroup
+            id="open-in"
+            type="single"
+            variant="outline"
+            value={settings.openIn}
+            onValueChange={(openIn) => openIn && void updateSettings({ openIn: openIn as OpenIn })}
+          >
+            {Object.entries(OPEN_IN).map(([id, o]) => (
+              <ToggleGroupItem key={id} value={id} className="px-3">
+                {o.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </Row>
+        <Row
+          label="Hide read posts"
+          htmlFor="hide-read"
+          hint="Posts you open stay visible until you switch to another list."
+        >
+          <Switch
+            id="hide-read"
+            checked={settings.hideRead}
+            onCheckedChange={(hideRead) => void updateSettings({ hideRead })}
+          />
+        </Row>
+        <Row
+          label="Hide read feeds"
+          htmlFor="hide-read-feeds"
+          hint="Feeds with nothing unread leave the sidebar. A link under the list shows them again."
+        >
+          <Switch
+            id="hide-read-feeds"
+            checked={settings.hideReadFeeds}
+            onCheckedChange={(hideReadFeeds) => void updateSettings({ hideReadFeeds })}
+          />
+        </Row>
+        <Row
+          label="Mark as read when scrolled past"
+          htmlFor="read-on-scroll"
+          hint="Unread posts count as read once they scroll up out of view."
+        >
+          <Switch
+            id="read-on-scroll"
+            checked={settings.markReadOnScroll}
+            onCheckedChange={(markReadOnScroll) => void updateSettings({ markReadOnScroll })}
+          />
+        </Row>
+        <Row label="Show thumbnails" htmlFor="thumbnails" hint="Post images next to titles in your lists.">
+          <Switch
+            id="thumbnails"
+            checked={settings.showThumbnails}
+            onCheckedChange={(showThumbnails) => void updateSettings({ showThumbnails })}
+          />
+        </Row>
+        <Row label="Show descriptions" htmlFor="summaries" hint="The short text under each title in your lists.">
+          <Switch
+            id="summaries"
+            checked={settings.showSummaries}
+            onCheckedChange={(showSummaries) => void updateSettings({ showSummaries })}
+          />
+        </Row>
+        <Row
+          label="Colour unread dots"
+          htmlFor="color-dots"
+          hint="The dot next to unread posts takes the main colour of the feed's icon."
+        >
+          <Switch
+            id="color-dots"
+            checked={settings.colorDots}
+            onCheckedChange={(colorDots) => void updateSettings({ colorDots })}
+          />
+        </Row>
+      </Section>
+    ),
+    "filters": (
+      <Section
+        title="Filters"
+        description="Hidden posts don't show in any list and don't count as unread."
+      >
+        <TopicFilters hidden={settings.hiddenTopics} />
+        {settings.hiddenTags.length > 0 && <HiddenTags tags={settings.hiddenTags} />}
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="keyword">Words in the title</Label>
+          <p className="text-muted-foreground -mt-1 text-xs">Whole words only, upper or lower case doesn't matter.</p>
+          <KeywordFilters keywords={settings.keywords} />
+        </div>
+      </Section>
+    ),
+    "import-export": (
+      <Section
+        id="import-export"
+        title="Import and export"
+        description="Move your subscriptions between Driftpost and other feed readers with an OPML file. Only the feeds come along, not posts or settings."
+      >
+        <OpmlSection />
+      </Section>
+    ),
+    "backup": (
+      <Section
+        title="Backup"
+        description="Everything in one file: your feeds, every post with its read and starred status, your settings and filters. Driftpost only keeps your data in this browser, so a backup is how you move it or keep it safe."
+      >
+        <BackupSection />
+        <Row
+          label="Remind me to back up"
+          htmlFor="backup-reminder"
+          hint="Every 30 days, Driftpost asks you to download a backup."
+        >
+          <Switch
+            id="backup-reminder"
+            checked={settings.backupReminder}
+            onCheckedChange={(backupReminder) => void updateSettings({ backupReminder })}
+          />
+        </Row>
+      </Section>
+    ),
+    "privacy": (
+      <Section title="Privacy">
+        <PrivacyNote />
+      </Section>
+    ),
+    "about": (
+      <Section title="About">
+        <About />
+      </Section>
+    ),
+  };
+
+  const scroller = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState<SettingsSectionId>("appearance");
+  const viewport = () => scroller.current?.querySelector<HTMLElement>("[data-slot=scroll-area-viewport]");
+
+  // After a jump, the part you picked stays highlighted even if it can't reach the top
+  // (short parts near the end), until you scroll yourself.
+  const pinned = useRef(false);
+
+  function scrollTo(id: SettingsSectionId, smooth: boolean) {
+    pinned.current = true;
+    document.getElementById(`settings-${id}`)?.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" });
+    setActive(id);
+  }
+
+  // Opened from a link that points at a part (like "Import OPML"): go straight there.
+  // Each request is followed once, so opening Settings later starts at the top again.
+  useEffect(() => {
+    if (!jump || jump.n <= lastJump) return;
+    lastJump = jump.n;
+    scrollTo(jump.section, false);
+  }, [jump?.n]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Highlight the part at the top of the view; at the very bottom, the last part.
+  useEffect(() => {
+    const vp = viewport();
+    if (!vp) return;
+    const update = () => {
+      if (pinned.current) return;
+      const top = vp.getBoundingClientRect().top + 24;
+      let current: SettingsSectionId = SETTINGS_SECTIONS[0].id;
+      for (const { id } of SETTINGS_SECTIONS) {
+        const el = document.getElementById(`settings-${id}`);
+        if (el && el.getBoundingClientRect().top <= top) current = id;
+      }
+      if (vp.scrollTop + vp.clientHeight >= vp.scrollHeight - 2) current = SETTINGS_SECTIONS.at(-1)!.id;
+      setActive(current);
+    };
+    // Scrolling by hand (wheel, touch, keys) lets the highlight follow again.
+    const unpin = () => {
+      pinned.current = false;
+    };
+    vp.addEventListener("scroll", update, { passive: true });
+    for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) vp.addEventListener(type, unpin, { passive: true });
+    return () => {
+      vp.removeEventListener("scroll", update);
+      for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) vp.removeEventListener(type, unpin);
+    };
+  }, []);
+
   return (
-    <ScrollArea className="min-h-0 flex-1">
-      <div className="mx-auto flex max-w-2xl flex-col gap-8 px-4 py-6 sm:px-6">
-        <Section title="Appearance">
-          <Row label="Theme" htmlFor="theme">
-            <ThemePicker />
-          </Row>
-          <FontPicker font={settings.font} />
-          <Row label="Text size" htmlFor="size">
-            <ToggleGroup
-              id="size"
-              type="single"
-              variant="outline"
-              value={settings.size}
-              onValueChange={(size) => size && void updateSettings({ size: size as SizeId })}
-            >
-              {Object.entries(SIZES).map(([id, s]) => (
-                <ToggleGroupItem key={id} value={id} aria-label={s.name} className="px-3">
-                  {s.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </Row>
-        </Section>
-
-        <Separator />
-
-        <Section title="Reading">
-          <Row label="Open articles" htmlFor="open-in" hint={OPEN_IN[settings.openIn].hint}>
-            <ToggleGroup
-              id="open-in"
-              type="single"
-              variant="outline"
-              value={settings.openIn}
-              onValueChange={(openIn) => openIn && void updateSettings({ openIn: openIn as OpenIn })}
-            >
-              {Object.entries(OPEN_IN).map(([id, o]) => (
-                <ToggleGroupItem key={id} value={id} className="px-3">
-                  {o.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </Row>
-          <Row
-            label="Hide read posts"
-            htmlFor="hide-read"
-            hint="Posts you open stay visible until you switch to another list."
+    <div className="flex min-h-0 flex-1">
+      <nav aria-label="Settings" className="hidden w-56 shrink-0 flex-col gap-1 border-r p-3 md:flex">
+        {SETTINGS_SECTIONS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => scrollTo(id, true)}
+            aria-current={active === id ? "location" : undefined}
+            className={cn(
+              "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm",
+              active === id
+                ? "bg-accent text-accent-foreground font-medium"
+                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+            )}
           >
-            <Switch
-              id="hide-read"
-              checked={settings.hideRead}
-              onCheckedChange={(hideRead) => void updateSettings({ hideRead })}
-            />
-          </Row>
-          <Row
-            label="Hide read feeds"
-            htmlFor="hide-read-feeds"
-            hint="Feeds with nothing unread leave the sidebar. A link under the list shows them again."
-          >
-            <Switch
-              id="hide-read-feeds"
-              checked={settings.hideReadFeeds}
-              onCheckedChange={(hideReadFeeds) => void updateSettings({ hideReadFeeds })}
-            />
-          </Row>
-          <Row
-            label="Mark as read when scrolled past"
-            htmlFor="read-on-scroll"
-            hint="Unread posts count as read once they scroll up out of view."
-          >
-            <Switch
-              id="read-on-scroll"
-              checked={settings.markReadOnScroll}
-              onCheckedChange={(markReadOnScroll) => void updateSettings({ markReadOnScroll })}
-            />
-          </Row>
-          <Row label="Show thumbnails" htmlFor="thumbnails" hint="Post images next to titles in your lists.">
-            <Switch
-              id="thumbnails"
-              checked={settings.showThumbnails}
-              onCheckedChange={(showThumbnails) => void updateSettings({ showThumbnails })}
-            />
-          </Row>
-          <Row label="Show descriptions" htmlFor="summaries" hint="The short text under each title in your lists.">
-            <Switch
-              id="summaries"
-              checked={settings.showSummaries}
-              onCheckedChange={(showSummaries) => void updateSettings({ showSummaries })}
-            />
-          </Row>
-        </Section>
-
-        <Separator />
-
-        <Section
-          title="Filters"
-          description="Hidden posts don't show in any list and don't count as unread."
-        >
-          <TopicFilters hidden={settings.hiddenTopics} />
-          {settings.hiddenTags.length > 0 && <HiddenTags tags={settings.hiddenTags} />}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="keyword">Words in the title</Label>
-            <p className="text-muted-foreground -mt-1 text-xs">Whole words only, upper or lower case doesn't matter.</p>
-            <KeywordFilters keywords={settings.keywords} />
-          </div>
-        </Section>
-        <Separator />
-        <Section
-          id="import-export"
-          title="Import and export"
-          description="Move your subscriptions between Driftpost and other feed readers with an OPML file. Only the feeds come along, not posts or settings."
-        >
-          <OpmlSection />
-        </Section>
-        <Separator />
-        <Section
-          title="Backup"
-          description="Everything in one file: your feeds, every post with its read and starred status, your settings and filters. Driftpost only keeps your data in this browser, so a backup is how you move it or keep it safe."
-        >
-          <BackupSection />
-          <Row
-            label="Remind me to back up"
-            htmlFor="backup-reminder"
-            hint="Every 30 days, Driftpost asks you to download a backup."
-          >
-            <Switch
-              id="backup-reminder"
-              checked={settings.backupReminder}
-              onCheckedChange={(backupReminder) => void updateSettings({ backupReminder })}
-            />
-          </Row>
-        </Section>
-        <Separator />
-        <Section title="Privacy">
-          <PrivacyNote />
-        </Section>
-        <Separator />
-        <Section title="About">
-          <About />
-        </Section>
-      </div>
-    </ScrollArea>
+            <Icon className="size-4" aria-hidden />
+            {label}
+          </button>
+        ))}
+      </nav>
+      <ScrollArea ref={scroller} className="min-h-0 flex-1">
+        <div className="mx-auto flex max-w-2xl flex-col gap-8 px-4 py-6 sm:px-6">
+          {SETTINGS_SECTIONS.map(({ id }, i) => (
+            <div key={id} id={`settings-${id}`} className="flex scroll-mt-6 flex-col gap-8">
+              {i > 0 && <Separator />}
+              {content[id]}
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }
 
@@ -339,6 +452,9 @@ function About() {
           Report a problem or idea
         </a>
       </div>
+      <p className="flex items-center gap-1">
+        Made with <HeartIcon className="size-3.5 fill-current text-red-500" aria-label="love" /> in Melbourne, Australia.
+      </p>
     </div>
   );
 }

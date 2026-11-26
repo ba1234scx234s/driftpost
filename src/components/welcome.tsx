@@ -28,7 +28,16 @@ const POINTS: { icon: ComponentType<SVGProps<SVGSVGElement>>; title: string; tex
 ];
 
 /** What someone sees before they follow anything. */
-export function Welcome({ onDiscover, onSettings }: { onDiscover: () => void; onSettings: () => void }) {
+export function Welcome({
+  onDiscover,
+  onSettings,
+  onOpenMenu,
+}: {
+  onDiscover: () => void;
+  onSettings: () => void;
+  /** On phones the address box is inside the menu: this opens it. */
+  onOpenMenu?: () => void;
+}) {
   return (
     <ScrollArea className="min-h-0 flex-1">
       <div className="mx-auto flex max-w-xl flex-col gap-8 px-6 py-12 sm:py-16">
@@ -60,7 +69,18 @@ export function Welcome({ onDiscover, onSettings }: { onDiscover: () => void; on
             </Button>
           </div>
           <p className="text-muted-foreground text-sm">
-            Or paste any website's address in the box at the top left. Coming from another reader?{" "}
+            {onOpenMenu ? (
+              <>
+                Or{" "}
+                <button type="button" onClick={onOpenMenu} className="text-foreground underline underline-offset-4">
+                  open the menu
+                </button>{" "}
+                and paste any website's address.
+              </>
+            ) : (
+              "Or paste any website's address in the box at the top left."
+            )}{" "}
+            Coming from another reader?{" "}
             <button type="button" onClick={onSettings} className="text-foreground underline underline-offset-4">
               Import an OPML file or restore a Driftpost backup
             </button>{" "}

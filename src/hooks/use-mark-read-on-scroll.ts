@@ -40,7 +40,11 @@ export function useMarkReadOnScroll(
           const first = !seen.has(entry.target);
           seen.add(entry.target);
           if (first) continue;
-          const top = entry.rootBounds?.top ?? root.getBoundingClientRect().top;
+          // A row (or the whole list) being taken off the page, or hidden, isn't scrolling:
+          // it reports a zero-size box at the very top, which would look like "scrolled past".
+          if (!entry.target.isConnected || !root.isConnected || !entry.rootBounds) continue;
+          if (entry.boundingClientRect.height === 0 || entry.rootBounds.height === 0) continue;
+          const top = entry.rootBounds.top;
           // Left the view through the top: scrolled past.
           if (!entry.isIntersecting && entry.boundingClientRect.bottom <= top + 1) {
             const id = Number((entry.target as HTMLElement).dataset.itemId);
