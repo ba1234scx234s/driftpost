@@ -294,9 +294,6 @@ function KeywordFilters({ keywords }: { keywords: string[] }) {
   );
 }
 
-/** Where "Report a problem" goes. Empty hides the link. */
-const REPORT_URL = "";
-
 function PrivacyNote() {
   return (
     <div className="text-muted-foreground flex max-w-prose flex-col gap-3 text-sm">
@@ -311,13 +308,6 @@ function PrivacyNote() {
         address is counted briefly to stop misuse.
       </p>
       <p>Articles belong to the sites that publish them. Driftpost shows them for personal reading only.</p>
-      {REPORT_URL && (
-        <p>
-          <a href={REPORT_URL} target="_blank" rel="noreferrer" className="text-foreground underline underline-offset-4">
-            Report a problem
-          </a>
-        </p>
-      )}
     </div>
   );
 }
