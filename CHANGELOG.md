@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.5.2 (26 November 2026)
+
+### Changed
+- Topics look different from a feed's own tags: topics are filled with squarer corners, tags stay round and outlined.
+
 ## 0.5.1 (26 November 2026)
 
 ### Changed

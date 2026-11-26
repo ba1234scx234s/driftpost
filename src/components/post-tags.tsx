@@ -56,7 +56,7 @@ function HideMenu(props: {
           variant={isTopic ? "default" : "outline"}
           className={
             isTopic
-              ? "group cursor-pointer"
+              ? "group cursor-pointer rounded-[0.25rem] px-1.5"
               : "text-muted-foreground hover:text-foreground group cursor-pointer font-normal"
           }
         >
