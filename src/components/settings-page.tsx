@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { EyeIcon, EyeOffIcon, MonitorIcon, MoonIcon, PlusIcon, SunIcon, XIcon } from "lucide-react";
+import { CodeIcon, EyeIcon, EyeOffIcon, MonitorIcon, MoonIcon, PlusIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -142,6 +142,10 @@ export function SettingsPage() {
         <Separator />
         <Section title="Privacy">
           <PrivacyNote />
+        </Section>
+        <Separator />
+        <Section title="About">
+          <About />
         </Section>
       </div>
     </ScrollArea>
@@ -290,6 +294,27 @@ function KeywordFilters({ keywords }: { keywords: string[] }) {
       ) : (
         <p className="text-muted-foreground text-sm">No filters yet.</p>
       )}
+    </div>
+  );
+}
+
+const REPO_URL = "https://github.com/ba1234scx234s/driftpost";
+
+function About() {
+  const link = "text-foreground inline-flex items-center gap-1.5 underline underline-offset-4";
+  return (
+    <div className="text-muted-foreground flex flex-col gap-3 text-sm">
+      <p>Driftpost {__APP_VERSION__}. Free to use, and the code is public on GitHub.</p>
+      <div className="flex flex-wrap gap-x-6 gap-y-2">
+        <a href={`${REPO_URL}/releases`} target="_blank" rel="noreferrer" className={link}>
+          <SparklesIcon className="size-4" aria-hidden />
+          What's new
+        </a>
+        <a href={REPO_URL} target="_blank" rel="noreferrer" className={link}>
+          <CodeIcon className="size-4" aria-hidden />
+          Source code on GitHub
+        </a>
+      </div>
     </div>
   );
 }
