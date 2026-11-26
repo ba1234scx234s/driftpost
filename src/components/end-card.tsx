@@ -9,43 +9,54 @@ import { unreadInView } from "@/lib/feeds";
 import type { FilterablePost } from "@/lib/settings";
 import type { View } from "@/lib/views";
 
+/** The next feed with unread posts, and its newest unread one. */
+export interface NextFeed {
+  feed: Feed;
+  unread: number;
+  first: Item;
+}
+
 interface Props {
   view: View;
   hidden: (post: FilterablePost) => boolean;
-  /** Opens a feed at this article. */
-  onOpen: (feedId: number, item: Item) => void;
+  /** The next feed to offer (worked out by the parent, so → can open it too). */
+  next: NextFeed | undefined;
+  /** Opens the next feed at its newest unread article. */
+  onOpenNext: () => void;
   onBackToList: () => void;
 }
 
 /** Shown in the reader after the last article of a list (→ or a swipe past the end). */
-export function EndCard({ view, hidden, onOpen, onBackToList }: Props) {
+export function EndCard({ view, hidden, next, onOpenNext, onBackToList }: Props) {
   const name = useLiveQuery(
     async () => (view === "all" ? "All posts" : view === "today" ? "Today" : (await db.feeds.get(view))?.title),
     [view],
   );
   const leftHere = useLiveQuery(() => unreadInView(view, hidden).count(), [view, hidden]);
-  const next = useLiveQuery(() => (typeof view === "number" ? nextFeed(view, hidden) : undefined), [view, hidden]);
 
   return (
     <ScrollArea className="min-h-0 flex-1">
       <div className="mx-auto flex max-w-md flex-col items-center gap-6 px-6 py-16 text-center">
         <CheckCircle2Icon className="text-muted-foreground size-8" aria-hidden />
-        <div className="flex flex-col gap-1">
-          <h2 className="font-heading text-xl font-semibold tracking-tight">
-            That was the last post{name ? ` in ${name}` : ""}
-          </h2>
+        <div className="flex w-full flex-col gap-1">
+          <h2 className="font-heading text-xl font-semibold tracking-tight">That was the last post</h2>
+          {name && (
+            <p className="text-muted-foreground line-clamp-2 text-sm break-words" title={name}>
+              in {name}
+            </p>
+          )}
           <p className="text-muted-foreground text-sm">
             {leftHere
               ? `${leftHere} unread ${leftHere === 1 ? "post is" : "posts are"} still further up the list.`
               : "You're all caught up here."}
           </p>
         </div>
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex w-full flex-col items-center gap-2">
           {next && (
-            <Button onClick={() => onOpen(next.feed.id, next.first)} className="max-w-full">
+            <Button onClick={onOpenNext} className="max-w-full" title={`Next: ${next.feed.title} (→)`}>
               <FeedIcon feed={next.feed} />
-              <span className="truncate">Next: {next.feed.title}</span>
-              <span className="opacity-70">{next.unread}</span>
+              <span className="min-w-0 truncate">Next: {next.feed.title}</span>
+              <span className="shrink-0 opacity-70">{next.unread}</span>
               <ArrowRightIcon />
             </Button>
           )}
@@ -60,10 +71,10 @@ export function EndCard({ view, hidden, onOpen, onBackToList }: Props) {
 }
 
 /** The next feed in the sidebar's order (wrapping round) with unread posts, and its newest one. */
-async function nextFeed(
+export async function nextFeed(
   current: number,
   hidden: (post: FilterablePost) => boolean,
-): Promise<{ feed: Feed; unread: number; first: Item } | undefined> {
+): Promise<NextFeed | undefined> {
   const feeds = await db.feeds.orderBy("addedAt").toArray();
   const at = feeds.findIndex((f) => f.id === current);
   const order = [...feeds.slice(at + 1), ...feeds.slice(0, Math.max(0, at))];

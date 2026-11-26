@@ -32,7 +32,7 @@ export function KofiNote() {
           }}
         >
           <CupSodaIcon />
-          Buy me an iced coffee
+          Buy me an iced coffee on Ko-fi
         </a>
       </Button>
     </div>

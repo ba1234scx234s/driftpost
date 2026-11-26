@@ -2,6 +2,15 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.12.2 (27 November 2026)
+
+### Changed
+- On the end card, → (or a swipe, or the next button) opens the next feed it suggests.
+
+### Fixed
+- Long feed names on the end card: the name sits under the heading (up to two lines), and the next-feed button shortens it instead of running off the edge.
+- The Ko-fi note's button now reads "Buy me an iced coffee on Ko-fi", like the link in About.
+
 ## 0.12.1 (27 November 2026)
 
 ### Changed

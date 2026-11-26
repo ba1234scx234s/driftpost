@@ -26,7 +26,7 @@ import { lineHeightOf, makePostFilter, SIZES, useSettings } from "@/lib/settings
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import type { Screen, View } from "@/lib/views";
-import { EndCard } from "@/components/end-card";
+import { EndCard, nextFeed } from "@/components/end-card";
 
 export default function App() {
   const [screen, setScreenState] = useState<Screen>("all");
@@ -108,6 +108,21 @@ export default function App() {
     [openIn, markRead],
   );
 
+  // On the end card: the next feed with unread posts. →, a swipe or its button opens it.
+  const endNext = useLiveQuery(
+    () => (atEnd && typeof view === "number" ? nextFeed(view, hidden) : undefined),
+    [atEnd, view, hidden],
+  );
+  const openNextFeed = useMemo(
+    () =>
+      endNext &&
+      (() => {
+        setScreen(endNext.feed.id);
+        openItem(endNext.first);
+      }),
+    [endNext, setScreen, openItem],
+  );
+
   const index = selected && items ? items.findIndex((it) => it.id === selected.id) : -1;
   const prevItem = index > 0 ? items![index - 1] : undefined;
   const nextItem = index >= 0 && items ? items[index + 1] : undefined;
@@ -133,6 +148,9 @@ export default function App() {
         } else if (selected && readerOpen && !atEnd) {
           e.preventDefault();
           setAtEnd(true);
+        } else if (atEnd && openNextFeed) {
+          e.preventDefault();
+          openNextFeed();
         }
       } else if (e.key === "ArrowLeft" && atEnd) {
         e.preventDefault();
@@ -150,7 +168,7 @@ export default function App() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [screen, selected, items, prevItem, nextItem, openItem, openIn, readerOpen, atEnd]);
+  }, [screen, selected, items, prevItem, nextItem, openItem, openIn, readerOpen, atEnd, openNextFeed]);
 
   useEffect(() => {
     void requestPersistence();
@@ -376,16 +394,14 @@ export default function App() {
               setAtEnd(false);
             }}
             onPrev={atEnd ? () => setAtEnd(false) : prevItem && (() => openItem(prevItem))}
-            onNext={atEnd ? undefined : nextItem ? () => openItem(nextItem) : () => setAtEnd(true)}
+            onNext={atEnd ? openNextFeed : nextItem ? () => openItem(nextItem) : () => setAtEnd(true)}
             end={
               atEnd ? (
                 <EndCard
                   view={view ?? "all"}
                   hidden={hidden}
-                  onOpen={(feedId, item) => {
-                    setScreen(feedId);
-                    openItem(item);
-                  }}
+                  next={endNext}
+                  onOpenNext={() => openNextFeed?.()}
                   onBackToList={() => {
                     setSelected(null);
                     setAtEnd(false);
