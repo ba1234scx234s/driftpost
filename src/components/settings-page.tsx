@@ -138,6 +138,17 @@ export function SettingsPage() {
           description="Everything in one file: your feeds, every post with its read and starred status, your settings and filters. Driftpost only keeps your data in this browser, so a backup is how you move it or keep it safe."
         >
           <BackupSection />
+          <Row
+            label="Remind me to back up"
+            htmlFor="backup-reminder"
+            hint="Every 30 days, Driftpost asks you to download a backup."
+          >
+            <Switch
+              id="backup-reminder"
+              checked={settings.backupReminder}
+              onCheckedChange={(backupReminder) => void updateSettings({ backupReminder })}
+            />
+          </Row>
         </Section>
         <Separator />
         <Section title="Privacy">

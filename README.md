@@ -51,7 +51,7 @@ Hide posts by topic (Sport, Politics, Business…), by words in the title, or by
 
 ### Yours to keep
 
-Because everything is in your browser, Settings → Backup downloads it all in one file: feeds, every post with its read and starred status, settings and filters. Restore it in any browser. Subscriptions also import and export as OPML.
+Because everything is in your browser, Settings → Backup downloads it all in one file: feeds, every post with its read and starred status, settings and filters. Restore it in any browser. Every 30 days Driftpost reminds you to make a fresh one (you can turn that off). Subscriptions also import and export as OPML.
 
 ## How it works
 
@@ -61,14 +61,6 @@ Driftpost is a single-page React app served by a small Cloudflare Worker.
 - **On the Worker:** most sites don't let browsers read their feeds directly (CORS), so the Worker fetches feeds, article pages and site icons on the app's behalf. It stores and logs nothing about who asked. It only passes on text (feeds, web pages, JSON), shares recently fetched feeds between readers for 10 minutes, and limits requests per visitor to stop misuse.
 
 Built with Vite, React, TypeScript, Tailwind CSS and shadcn/ui.
-
-## Development
-
-```bash
-npm install
-npm run dev      # app and Worker together on http://localhost:5173
-npm run deploy   # type-check, build and deploy to Cloudflare
-```
 
 ## Licence
 

@@ -36,6 +36,12 @@ export interface Settings {
   showSummaries: boolean;
   /** How an article opens: in Driftpost's reader column, or the website in a new browser tab. */
   openIn: OpenIn;
+  /** Every 30 days, ask to download a backup. */
+  backupReminder: boolean;
+  /** When a backup was last downloaded (ms since 1970). */
+  lastBackupAt?: number;
+  /** "Later" on the backup reminder: don't ask again before this time. */
+  backupSnoozedUntil?: number;
 }
 
 export const OPEN_IN = {
@@ -56,6 +62,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showThumbnails: true,
   showSummaries: true,
   openIn: "reader",
+  backupReminder: true,
 };
 
 const KEY = "prefs";

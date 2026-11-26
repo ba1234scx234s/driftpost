@@ -10,6 +10,7 @@ import { Reader } from "@/components/reader";
 import { Logo } from "@/components/logo";
 import { DiscoverPage } from "@/components/discover-page";
 import { Welcome } from "@/components/welcome";
+import { BackupReminder } from "@/components/backup-reminder";
 import { SettingsPage } from "@/components/settings-page";
 import { SubscriptionsMenu } from "@/components/subscriptions-menu";
 import { Button } from "@/components/ui/button";
@@ -261,6 +262,7 @@ export default function App() {
           />
         )}
       </main>
+      <BackupReminder />
     </div>
   );
 }

@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.6.0 (26 November 2026)
+
+### New
+- A backup reminder: every 30 days, Driftpost asks you to download your feeds, read status and settings in one file. "Later" asks again in a week. On by default; turn it off in Settings → Backup.
+
 ## 0.5.3 (26 November 2026)
 
 ### Changed

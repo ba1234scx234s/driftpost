@@ -3,6 +3,7 @@
 // Restoring replaces what's in this browser with the backup, exactly as it was.
 
 import { db, type Feed, type Item, type SettingRow } from "./db";
+import { updateSettings } from "./settings";
 
 const FORMAT = "driftpost-backup";
 const VERSION = 1;
@@ -98,6 +99,27 @@ export async function restoreBackup(b: Backup): Promise<void> {
       // storage unavailable: the theme stays as it is
     }
   }
+}
+
+/** Makes the backup, hands it to the browser as a download, and remembers when. */
+export async function downloadBackup(): Promise<BackupSummary> {
+  const { text, summary } = await createBackup();
+  const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = backupFileName();
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  await updateSettings({ lastBackupAt: Date.now(), backupSnoozedUntil: undefined });
+  return summary;
+}
+
+export function describeBackup(s: BackupSummary): string {
+  const date = new Date(s.exportedAt);
+  const when = Number.isNaN(date.getTime())
+    ? ""
+    : ` from ${date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`;
+  return `${s.feeds} ${s.feeds === 1 ? "feed" : "feeds"} and ${s.posts} ${s.posts === 1 ? "post" : "posts"}${when}`;
 }
 
 export function backupFileName(date = new Date()): string {

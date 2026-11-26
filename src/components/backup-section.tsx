@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
-  backupFileName,
   BackupError,
-  createBackup,
+  describeBackup as describe,
+  downloadBackup,
   readBackup,
   restoreBackup,
   summarise,
@@ -34,13 +34,7 @@ export function BackupSection() {
   async function download() {
     setSaving(true);
     try {
-      const { text, summary } = await createBackup();
-      const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = backupFileName();
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      const summary = await downloadBackup();
       toast.success("Backup downloaded", { description: describe(summary) });
     } catch {
       toast.error("Couldn't make the backup");
@@ -117,12 +111,4 @@ export function BackupSection() {
       </AlertDialog>
     </>
   );
-}
-
-function describe(s: BackupSummary): string {
-  const date = new Date(s.exportedAt);
-  const when = Number.isNaN(date.getTime())
-    ? ""
-    : ` from ${date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`;
-  return `${s.feeds} ${s.feeds === 1 ? "feed" : "feeds"} and ${s.posts} ${s.posts === 1 ? "post" : "posts"}${when}`;
 }
