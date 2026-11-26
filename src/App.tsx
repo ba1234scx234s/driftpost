@@ -9,6 +9,7 @@ import { ItemList } from "@/components/item-list";
 import { Reader } from "@/components/reader";
 import { Logo } from "@/components/logo";
 import { DiscoverPage } from "@/components/discover-page";
+import { Welcome } from "@/components/welcome";
 import { SettingsPage } from "@/components/settings-page";
 import { SubscriptionsMenu } from "@/components/subscriptions-menu";
 import { Button } from "@/components/ui/button";
@@ -238,6 +239,8 @@ export default function App() {
           <SettingsPage />
         ) : screen === "discover" ? (
           <DiscoverPage onShowFeed={setScreen} />
+        ) : feeds && feeds.length === 0 ? (
+          <Welcome onDiscover={() => setScreen("discover")} onSettings={() => setScreen("settings")} />
         ) : (
           <ItemList
             view={view ?? "all"}
