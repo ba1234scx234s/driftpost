@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.12.1 (27 November 2026)
+
+### Changed
+- Clicking or tapping the Driftpost logo goes to All posts.
+
 ## 0.12.0 (27 November 2026)
 
 ### New

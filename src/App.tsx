@@ -196,9 +196,19 @@ export default function App() {
     <>
       {/* Same height and padding as the list header next to it, so their bottom lines meet. */}
       <div className="flex min-h-12 shrink-0 items-center justify-between border-b px-3 py-2.5">
-          <h1 className="font-heading flex items-center gap-2 px-1 text-lg font-semibold tracking-tight">
-            <Logo className="size-6" aria-hidden title="" />
-            Driftpost
+          <h1 className="font-heading text-lg font-semibold tracking-tight">
+            <a
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                go("all");
+              }}
+              aria-label="Driftpost, go to All posts"
+              className="focus-visible:ring-ring/50 flex items-center gap-2 rounded-md px-1 outline-none focus-visible:ring-[3px]"
+            >
+              <Logo className="size-6" aria-hidden title="" />
+              Driftpost
+            </a>
           </h1>
           {feeds && feeds.length > 0 && (
             <Tooltip>
