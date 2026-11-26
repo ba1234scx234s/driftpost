@@ -15,9 +15,28 @@ export const SIZES = {
 } as const;
 export type SizeId = keyof typeof SIZES;
 
+/** Space between lines in an article's body text (not titles or headings). */
+export const LINE_HEIGHTS = {
+  compact: { label: "Compact", value: 1.5 },
+  default: { label: "Default", value: 1.75 },
+  relaxed: { label: "Relaxed", value: 2 },
+} as const;
+export type LineHeightId = keyof typeof LINE_HEIGHTS | "custom";
+export const CUSTOM_LINE_HEIGHT = { min: 1, max: 3, step: 0.05 } as const;
+
+/** The line height to use, as a multiple of the text size. */
+export function lineHeightOf(settings: Pick<Settings, "lineHeight" | "customLineHeight">): number {
+  if (settings.lineHeight === "custom") return settings.customLineHeight;
+  return (LINE_HEIGHTS[settings.lineHeight] ?? LINE_HEIGHTS.default).value;
+}
+
 export interface Settings {
   font: FontId;
   size: SizeId;
+  /** Line height of an article's body text. */
+  lineHeight: LineHeightId;
+  /** Used when lineHeight is "custom". */
+  customLineHeight: number;
   /** Posts whose title contains one of these words are hidden. */
   keywords: string[];
   /** Posts about these topics are hidden (see topics.ts). */
@@ -55,6 +74,8 @@ export type OpenIn = keyof typeof OPEN_IN;
 export const DEFAULT_SETTINGS: Settings = {
   font: "geist",
   size: "m",
+  lineHeight: "default",
+  customLineHeight: 1.75,
   keywords: [],
   hiddenTopics: [],
   hiddenTags: [],

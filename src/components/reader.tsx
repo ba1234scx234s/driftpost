@@ -142,7 +142,7 @@ function ArticleView({ item, live, feed }: { item: Item; live: Item; feed: Feed 
         )}
 
         <div
-          className="prose prose-neutral dark:prose-invert prose-img:rounded-md prose-a:underline-offset-2 prose-pre:whitespace-pre-wrap mt-8 max-w-none break-words"
+          className="prose prose-neutral dark:prose-invert prose-img:rounded-md prose-a:underline-offset-2 prose-pre:whitespace-pre-wrap mt-8 leading-(--article-leading) max-w-none break-words"
           // Sanitised by DOMPurify in sanitiseArticle.
           dangerouslySetInnerHTML={{ __html: html }}
         />

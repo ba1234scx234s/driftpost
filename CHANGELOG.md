@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.10.0 (27 November 2026)
+
+### New
+- Line height for articles in Settings → Appearance: Compact, Default, Relaxed, or Custom (any value from 1 to 3). It changes the article's text only, not titles or headings.
+
 ## 0.9.1 (27 November 2026)
 
 ### New

@@ -19,6 +19,9 @@ import {
   OPEN_IN,
   unhideTag,
   SIZES,
+  LINE_HEIGHTS,
+  CUSTOM_LINE_HEIGHT,
+  type LineHeightId,
   updateSettings,
   useSettings,
   type OpenIn,
@@ -68,6 +71,7 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
             ))}
           </ToggleGroup>
         </Row>
+        <LineHeightPicker lineHeight={settings.lineHeight} custom={settings.customLineHeight} />
       </Section>
     ),
     "reading": (
@@ -500,6 +504,59 @@ function Section({
       </div>
       {children}
     </section>
+  );
+}
+
+/** Line height of an article's body text: three presets, or any value. */
+function LineHeightPicker({ lineHeight, custom }: { lineHeight: LineHeightId; custom: number }) {
+  const [draft, setDraft] = useState(String(custom));
+  useEffect(() => setDraft(String(custom)), [custom]);
+  const { min, max, step } = CUSTOM_LINE_HEIGHT;
+
+  const commit = () => {
+    const n = Number(draft.replace(",", "."));
+    if (!draft.trim() || !Number.isFinite(n)) return setDraft(String(custom));
+    const value = Math.round(Math.min(max, Math.max(min, n)) * 100) / 100;
+    setDraft(String(value));
+    if (value !== custom) void updateSettings({ customLineHeight: value });
+  };
+
+  return (
+    <Row label="Line height" htmlFor="line-height" hint="Space between lines in an article's text.">
+      <div className="flex flex-wrap items-center gap-2">
+        <ToggleGroup
+          id="line-height"
+          type="single"
+          variant="outline"
+          value={lineHeight}
+          onValueChange={(value) => value && void updateSettings({ lineHeight: value as LineHeightId })}
+        >
+          {Object.entries(LINE_HEIGHTS).map(([id, l]) => (
+            <ToggleGroupItem key={id} value={id} className="px-3">
+              {l.label}
+            </ToggleGroupItem>
+          ))}
+          <ToggleGroupItem value="custom" className="px-3">
+            Custom
+          </ToggleGroupItem>
+        </ToggleGroup>
+        {lineHeight === "custom" && (
+          <Input
+            type="number"
+            inputMode="decimal"
+            aria-label="Custom line height"
+            min={min}
+            max={max}
+            step={step}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commit}
+            onKeyDown={(e) => e.key === "Enter" && commit()}
+            className="w-20"
+          />
+        )}
+      </div>
+    </Row>
   );
 }
 

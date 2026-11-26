@@ -22,7 +22,7 @@ import { useVisibleItems } from "@/hooks/use-visible-items";
 import { db, requestPersistence, type Item } from "@/lib/db";
 import { markAllRead, markUnread, unreadInView } from "@/lib/feeds";
 import { fontStack, googleFamily, loadGoogleFont } from "@/lib/fonts";
-import { makePostFilter, SIZES, useSettings } from "@/lib/settings";
+import { lineHeightOf, makePostFilter, SIZES, useSettings } from "@/lib/settings";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import type { Screen, View } from "@/lib/views";
@@ -151,7 +151,8 @@ export default function App() {
     const family = googleFamily(settings.font);
     if (family) void loadGoogleFont(family);
     root.style.fontSize = `${SIZES[settings.size].px}px`;
-  }, [settings.font, settings.size]);
+    root.style.setProperty("--article-leading", String(lineHeightOf(settings)));
+  }, [settings.font, settings.size, settings.lineHeight, settings.customLineHeight]);
 
   const unreadHere =
     useLiveQuery(() => (view === null ? 0 : unreadInView(view, hidden).count()), [view, hidden]) ?? 0;
