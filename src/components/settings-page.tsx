@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { CodeIcon, EyeIcon, EyeOffIcon, MonitorIcon, MoonIcon, PlusIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
+import { CodeIcon, EyeIcon, MessageSquareWarningIcon, EyeOffIcon, MonitorIcon, MoonIcon, PlusIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -324,6 +324,10 @@ function About() {
         <a href={REPO_URL} target="_blank" rel="noreferrer" className={link}>
           <CodeIcon className="size-4" aria-hidden />
           Source code on GitHub
+        </a>
+        <a href={`${REPO_URL}/issues/new`} target="_blank" rel="noreferrer" className={link}>
+          <MessageSquareWarningIcon className="size-4" aria-hidden />
+          Report a problem or idea
         </a>
       </div>
     </div>

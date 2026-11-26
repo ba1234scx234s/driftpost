@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.6.1 (26 November 2026)
+
+### New
+- Report a problem or share an idea from Settings → About. It opens a new issue on GitHub.
+
 ## 0.6.0 (26 November 2026)
 
 ### New
