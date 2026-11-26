@@ -2,6 +2,12 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.6.2 (27 November 2026)
+
+### Changed
+- OPML import and export moved from the ••• menu next to the logo into Settings → Import and export.
+- Following a site now starts from a + button next to the logo, once you follow at least one feed. It opens the address field with Discover right below it. Esc closes it.
+
 ## 0.6.1 (26 November 2026)
 
 ### New

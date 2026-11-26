@@ -1,19 +1,13 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import { DownloadIcon, EllipsisIcon, UploadIcon } from "lucide-react";
+import { DownloadIcon, Loader2Icon, UploadIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { exportOpml, importOpml } from "@/lib/feeds";
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 
-export function SubscriptionsMenu() {
+/** Settings → Import and export: move subscriptions to and from other feed readers. */
+export function OpmlSection() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
@@ -60,25 +54,15 @@ export function SubscriptionsMenu() {
   }
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-sm" aria-label="Subscriptions menu" disabled={busy}>
-            <EllipsisIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-52">
-          <DropdownMenuLabel>Subscriptions</DropdownMenuLabel>
-          <DropdownMenuItem onSelect={() => fileInput.current?.click()}>
-            <UploadIcon />
-            Import OPML…
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={handleExport}>
-            <DownloadIcon />
-            Export OPML
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+    <div className="flex flex-wrap gap-2">
+      <Button variant="outline" onClick={() => fileInput.current?.click()} disabled={busy}>
+        {busy ? <Loader2Icon className="animate-spin" /> : <UploadIcon />}
+        Import OPML…
+      </Button>
+      <Button variant="outline" onClick={handleExport}>
+        <DownloadIcon />
+        Export OPML
+      </Button>
       <input
         ref={fileInput}
         type="file"
@@ -86,7 +70,7 @@ export function SubscriptionsMenu() {
         className="hidden"
         onChange={handleFile}
       />
-    </>
+    </div>
   );
 }
 

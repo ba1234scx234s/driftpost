@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type Ref } from "react";
 import { Loader2Icon, PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,14 @@ import type { Feed } from "@/lib/db";
 export function AddFeedForm({
   onAdded,
   onShowFeed,
+  onCancel,
+  inputRef,
 }: {
   onAdded: (feed: Feed) => void;
   onShowFeed: (feedId: number) => void;
+  /** Esc in the field: close the form. */
+  onCancel?: () => void;
+  inputRef?: Ref<HTMLInputElement>;
 }) {
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
@@ -43,7 +48,14 @@ export function AddFeedForm({
   return (
     <form onSubmit={handleSubmit} className="flex gap-2">
       <Input
+        ref={inputRef}
         value={value}
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && onCancel) {
+            setValue("");
+            onCancel();
+          }
+        }}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Website or feed address"
         aria-label="Website or feed address"

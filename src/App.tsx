@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { CheckCheckIcon, CompassIcon, RefreshCwIcon, SettingsIcon } from "lucide-react";
+import { CheckCheckIcon, CompassIcon, PlusIcon, RefreshCwIcon, SettingsIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AddFeedForm } from "@/components/add-feed-form";
 import { FeedMenu } from "@/components/feed-menu";
@@ -12,7 +12,6 @@ import { DiscoverPage } from "@/components/discover-page";
 import { Welcome } from "@/components/welcome";
 import { BackupReminder } from "@/components/backup-reminder";
 import { SettingsPage } from "@/components/settings-page";
-import { SubscriptionsMenu } from "@/components/subscriptions-menu";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -40,6 +39,12 @@ export default function App() {
   );
 
   const feeds = useLiveQuery(() => db.feeds.toArray(), []);
+  const [addOpen, setAddOpen] = useState(false);
+  const addInput = useRef<HTMLInputElement>(null);
+  // Opening the "follow a site" field puts the cursor in it.
+  useEffect(() => {
+    if (addOpen) addInput.current?.focus();
+  }, [addOpen]);
   const selectedFeed = typeof screen === "number" ? feeds?.find((f) => f.id === screen) : undefined;
   const lastFetched = feeds?.length ? Math.max(...feeds.map((f) => f.lastFetched ?? 0)) : undefined;
   // The post list being shown, or null on the Settings and Discover pages.
@@ -166,20 +171,54 @@ export default function App() {
               <Logo className="size-6" aria-hidden title="" />
               Driftpost
             </h1>
-            <SubscriptionsMenu />
+            {feeds && feeds.length > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={addOpen ? "Close" : "Follow a site"}
+                    aria-expanded={addOpen}
+                    onClick={() => setAddOpen((open) => !open)}
+                  >
+                    {addOpen ? <XIcon /> : <PlusIcon />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{addOpen ? "Close" : "Follow a site"}</TooltipContent>
+              </Tooltip>
+            )}
           </div>
-          <AddFeedForm onAdded={(feed) => setScreen(feed.id)} onShowFeed={setScreen} />
+          {/* Always there until you follow something; after that, behind the + button. */}
+          {(addOpen || feeds?.length === 0) && (
+            <AddFeedForm
+              inputRef={addInput}
+              onAdded={(feed) => {
+                setAddOpen(false);
+                setScreen(feed.id);
+              }}
+              onShowFeed={(id) => {
+                setAddOpen(false);
+                setScreen(id);
+              }}
+              onCancel={feeds?.length ? () => setAddOpen(false) : undefined}
+            />
+          )}
+          {/* Discover lives with "follow a site": the other way to find something new. */}
+          {(addOpen || feeds?.length === 0) && (
+            <div className="-mx-1 -mt-1">
+              <SidebarRow
+                active={screen === "discover"}
+                onClick={() => setScreen("discover")}
+                icon={<CompassIcon className="size-4" />}
+                label="Discover"
+              />
+            </div>
+          )}
         </div>
         <Separator />
         <FeedSidebar selected={screen} onSelect={setScreen} hidden={hidden} />
         <Separator />
         <div className="flex flex-col gap-0.5 p-2">
-          <SidebarRow
-            active={screen === "discover"}
-            onClick={() => setScreen("discover")}
-            icon={<CompassIcon className="size-4" />}
-            label="Discover"
-          />
           <SidebarRow
             active={screen === "settings"}
             onClick={() => setScreen("settings")}

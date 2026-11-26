@@ -60,12 +60,11 @@ export function Welcome({ onDiscover, onSettings }: { onDiscover: () => void; on
             </Button>
           </div>
           <p className="text-muted-foreground text-sm">
-            Or paste any website's address in the box at the top left. Coming from another reader? Import your
-            OPML file from the ••• menu, or{" "}
+            Or paste any website's address in the box at the top left. Coming from another reader?{" "}
             <button type="button" onClick={onSettings} className="text-foreground underline underline-offset-4">
-              restore a Driftpost backup
-            </button>
-            .
+              Import an OPML file or restore a Driftpost backup
+            </button>{" "}
+            in Settings.
           </p>
         </div>
 

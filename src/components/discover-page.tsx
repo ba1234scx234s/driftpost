@@ -76,7 +76,7 @@ export function DiscoverPage({ onShowFeed }: { onShowFeed: (feedId: number) => v
 
         {sections.length === 0 && (
           <p className="text-muted-foreground mt-10 text-center text-sm">
-            No feeds match “{query}”. You can still paste any site's address in the box at the top left.
+            No feeds match “{query}”. You can still follow any site: press + at the top left and paste its address.
           </p>
         )}
 

@@ -51,7 +51,7 @@ Hide posts by topic (Sport, Politics, Business…), by words in the title, or by
 
 ### Yours to keep
 
-Because everything is in your browser, Settings → Backup downloads it all in one file: feeds, every post with its read and starred status, settings and filters. Restore it in any browser. Every 30 days Driftpost reminds you to make a fresh one (you can turn that off). Subscriptions also import and export as OPML.
+Because everything is in your browser, Settings → Backup downloads it all in one file: feeds, every post with its read and starred status, settings and filters. Restore it in any browser. Every 30 days Driftpost reminds you to make a fresh one (you can turn that off). Subscriptions also import and export as OPML, in Settings → Import and export.
 
 ## How it works
 

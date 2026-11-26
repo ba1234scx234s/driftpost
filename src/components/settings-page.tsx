@@ -11,6 +11,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { TOPIC_IDS, TOPICS, type TopicId } from "@/lib/topics";
 import { BackupSection } from "@/components/backup-section";
+import { OpmlSection } from "@/components/opml-section";
 import { FontPicker } from "@/components/font-picker";
 import {
   normaliseKeyword,
@@ -131,6 +132,13 @@ export function SettingsPage() {
             <p className="text-muted-foreground -mt-1 text-xs">Whole words only, upper or lower case doesn't matter.</p>
             <KeywordFilters keywords={settings.keywords} />
           </div>
+        </Section>
+        <Separator />
+        <Section
+          title="Import and export"
+          description="Move your subscriptions between Driftpost and other feed readers with an OPML file. Only the feeds come along, not posts or settings."
+        >
+          <OpmlSection />
         </Section>
         <Separator />
         <Section
