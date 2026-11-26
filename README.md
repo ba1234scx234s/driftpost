@@ -53,10 +53,6 @@ Hide posts by topic (Sport, Politics, Business…), by words in the title, or by
 
 Because everything is in your browser, Settings → Backup downloads it all in one file: feeds, every post with its read and starred status, settings and filters. Restore it in any browser. Subscriptions also import and export as OPML.
 
-### Works on your phone
-
-<img src="docs/screenshots/phone.png" alt="Driftpost on a phone-sized screen" width="320">
-
 ## How it works
 
 Driftpost is a single-page React app served by a small Cloudflare Worker.
