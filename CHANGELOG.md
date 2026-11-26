@@ -2,6 +2,16 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.0.0 (27 November 2026)
+
+Driftpost 1.0: the first stable version. Nothing new since 0.14.1; this marks the point where everything below has settled. In short, Driftpost is:
+
+- **Private by design:** no account, no login, and nothing saved on a server. Your feeds, read status and settings live only in your browser, with backups and OPML import and export to keep them safe or take them elsewhere.
+- **Free of the usual noise:** no ads, no tracking, no algorithm and no AI that learns from you. Just the posts from the sites you choose, newest first.
+- **Made for reading:** full articles in a clean reader, your choice of font, text size and line height, light and dark mode, arrow keys and swipes to move between posts, and an end card that leads you to the next feed.
+- **Easy to keep calm:** hide read posts and feeds, filter out topics, tags and words, and tell feeds apart by their colours and icons.
+- **Quick to start:** Discover has popular feeds in 14 categories, or paste any site's address.
+
 ## 0.14.1 (27 November 2026)
 
 ### Changed
