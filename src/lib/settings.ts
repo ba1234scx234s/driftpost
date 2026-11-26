@@ -50,7 +50,7 @@ export const DEFAULT_SETTINGS: Settings = {
   keywords: [],
   hiddenTopics: [],
   hiddenTags: [],
-  hideRead: false,
+  hideRead: true,
   hideReadFeeds: false,
   markReadOnScroll: true,
   showThumbnails: true,
@@ -59,10 +59,22 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 const KEY = "prefs";
+/**
+ * Bumped when a default changes for everyone. Saved prefs from an older version drop the
+ * values that were only ever the old default (v2: "Hide read posts" became on by default).
+ */
+const PREFS_VERSION = 2;
+
+function load(value: (Partial<Settings> & { v?: number }) | undefined): Settings {
+  const saved = { ...value };
+  if ((saved.v ?? 1) < 2) delete saved.hideRead;
+  delete saved.v;
+  return { ...DEFAULT_SETTINGS, ...saved };
+}
 
 export function useSettings(): Settings {
   const row = useLiveQuery(() => db.settings.get(KEY), []);
-  const settings: Settings = { ...DEFAULT_SETTINGS, ...row?.value };
+  const settings = load(row?.value);
   // An "in-app browser" option existed briefly; anything unknown falls back to the reader.
   if (!(settings.openIn in OPEN_IN)) settings.openIn = "reader";
   return settings;
@@ -70,13 +82,13 @@ export function useSettings(): Settings {
 
 export async function updateSettings(changes: Partial<Settings>): Promise<void> {
   await db.transaction("rw", db.settings, async () => {
-    const current = (await db.settings.get(KEY))?.value ?? {};
-    await db.settings.put({ key: KEY, value: { ...DEFAULT_SETTINGS, ...current, ...changes } });
+    const current = load((await db.settings.get(KEY))?.value);
+    await db.settings.put({ key: KEY, value: { ...current, ...changes, v: PREFS_VERSION } });
   });
 }
 
 export async function getSettings(): Promise<Settings> {
-  return { ...DEFAULT_SETTINGS, ...(await db.settings.get(KEY))?.value };
+  return load((await db.settings.get(KEY))?.value);
 }
 
 /** Cleans up a typed keyword: trims and collapses spaces. Empty means "ignore". */
