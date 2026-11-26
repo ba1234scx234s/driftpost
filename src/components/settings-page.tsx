@@ -20,6 +20,8 @@ import {
   OPEN_IN,
   unhideTag,
   SIZES,
+  THUMBNAILS,
+  type Thumbnails,
   LINE_HEIGHTS,
   CUSTOM_LINE_HEIGHT,
   type LineHeightId,
@@ -125,12 +127,20 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
             onCheckedChange={(markReadOnScroll) => void updateSettings({ markReadOnScroll })}
           />
         </Row>
-        <Row label="Show thumbnails" htmlFor="thumbnails" hint="Post images next to titles in your lists.">
-          <Switch
+        <Row label="Thumbnails" htmlFor="thumbnails" hint={THUMBNAILS[settings.thumbnails].hint}>
+          <ToggleGroup
             id="thumbnails"
-            checked={settings.showThumbnails}
-            onCheckedChange={(showThumbnails) => void updateSettings({ showThumbnails })}
-          />
+            type="single"
+            variant="outline"
+            value={settings.thumbnails}
+            onValueChange={(thumbnails) => thumbnails && void updateSettings({ thumbnails: thumbnails as Thumbnails })}
+          >
+            {Object.entries(THUMBNAILS).map(([id, t]) => (
+              <ToggleGroupItem key={id} value={id} className="px-3">
+                {t.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </Row>
         <Row label="Show descriptions" htmlFor="summaries" hint="The short text under each title in your lists.">
           <Switch

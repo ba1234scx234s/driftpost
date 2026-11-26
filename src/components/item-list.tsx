@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useTheme } from "next-themes";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FeedIcon, iconNeedsTile } from "@/components/feed-icon";
 import { useMarkReadOnScroll } from "@/hooks/use-mark-read-on-scroll";
 import { Skeleton } from "@/components/ui/skeleton";
 import { db, type Feed, type Item } from "@/lib/db";
@@ -24,16 +25,17 @@ interface Props {
 }
 
 export function ItemList({ view, items, selectedId, onSelect, compact, onScrolledPast }: Props) {
-  const { hideRead, showThumbnails, showSummaries, markReadOnScroll, colorDots } = useSettings();
+  const { hideRead, thumbnails, showSummaries, markReadOnScroll, colorDots } = useSettings();
   const listRef = useRef<HTMLOListElement>(null);
   useMarkReadOnScroll(listRef, items, markReadOnScroll, onScrolledPast);
   const feeds = useLiveQuery(() => db.feeds.toArray(), []);
-  const feedTitles = feeds && new Map(feeds.map((f) => [f.id, f.title]));
-  const dotColors = useDotColors(feeds, colorDots);
+  const feedsById = feeds && new Map(feeds.map((f) => [f.id, f]));
+  // Feed colours tint the unread dots and the placeholder tiles for posts without a picture.
+  const feedColors = useDotColors(feeds, colorDots || thumbnails !== "none");
   const showFeed = typeof view !== "number";
-  // Keep the picture column for posts without one, so rows line up, but only in lists
-  // that have pictures: text-only blogs keep their full width.
-  const reserveThumbnail = !!items?.some((it) => it.image);
+  // Posts without a picture get a tile in their feed's colour, so rows line up, but only in
+  // lists that have pictures: text-only blogs keep their full width.
+  const reserveThumbnail = thumbnails === "icon" || !!items?.some((it) => it.image);
 
   if (!items) {
     return (
@@ -69,10 +71,12 @@ export function ItemList({ view, items, selectedId, onSelect, compact, onScrolle
           <ItemRow
             key={item.id}
             item={item}
-            feedTitle={feedTitles?.get(item.feedId)}
-            dotColor={dotColors.get(item.feedId)}
+            feed={feedsById?.get(item.feedId)}
+            dotColor={colorDots ? feedColors.get(item.feedId) : undefined}
+            tileColor={feedColors.get(item.feedId)}
             showFeed={showFeed}
-            showThumbnail={showThumbnails}
+            showThumbnail={thumbnails !== "none"}
+            showImage={thumbnails === "image"}
             reserveThumbnail={reserveThumbnail}
             showSummary={showSummaries}
             selected={item.id === selectedId}
@@ -87,11 +91,15 @@ export function ItemList({ view, items, selectedId, onSelect, compact, onScrolle
 
 function ItemRow(props: {
   item: Item;
-  feedTitle?: string;
+  feed?: Feed;
   showFeed: boolean;
   showThumbnail: boolean;
-  /** Leave an empty space where the picture would be. */
+  /** Use the post's picture when it has one (otherwise always the feed's tile). */
+  showImage: boolean;
+  /** Show a placeholder tile when the post has no picture. */
   reserveThumbnail: boolean;
+  /** The feed's colour, for the placeholder tile. */
+  tileColor?: string;
   showSummary: boolean;
   selected: boolean;
   compact: boolean;
@@ -99,7 +107,10 @@ function ItemRow(props: {
   dotColor?: string;
   onSelect: () => void;
 }) {
-  const { item, feedTitle, showFeed, selected, compact } = props;
+  const { item, feed, showFeed, selected, compact } = props;
+  const feedTitle = feed?.title;
+  const [broken, setBroken] = useState(false);
+  const picture = props.showImage && item.image && !broken ? item.image : undefined;
   const ref = useRef<HTMLButtonElement>(null);
 
   // Keep the selected post in view when stepping through with the arrow keys.
@@ -150,26 +161,44 @@ function ItemRow(props: {
             </p>
           )}
         </div>
-        {props.showThumbnail && (item.image || props.reserveThumbnail) && (
+        {props.showThumbnail && (picture || props.reserveThumbnail) && (
           <div className={cn("shrink-0", compact ? "size-12" : "size-16 sm:size-20")}>
-            {item.image && (
+            {picture ? (
               <img
-                key={item.image}
-                src={item.image}
+                key={picture}
+                src={picture}
                 alt=""
                 loading="lazy"
                 referrerPolicy="no-referrer"
                 className="bg-muted size-full rounded-md object-cover"
-                onError={(e) => {
-                  // Broken picture: keep the space so the row still lines up.
-                  e.currentTarget.style.visibility = "hidden";
-                }}
+                onError={() => setBroken(true)}
               />
+            ) : (
+              feed && <FeedTile feed={feed} color={props.tileColor} compact={compact} />
             )}
           </div>
         )}
       </button>
     </li>
+  );
+}
+
+/**
+ * Stands in for a missing picture: the feed's small icon in the middle of a tile tinted
+ * with its colour. Dark icons (dark shapes on see-through) need a light tile in dark mode:
+ * a pale tint of their colour, or light grey when they have none.
+ */
+function FeedTile({ feed, color, compact }: { feed: Feed; color?: string; compact: boolean }) {
+  const light = iconNeedsTile(feed);
+  const tint = color && `color-mix(in oklab, ${color} 22%, transparent)`;
+  const style = {
+    "--tile": tint ?? "var(--muted)",
+    "--tile-dark": light ? (color ? `color-mix(in oklab, ${color} 20%, oklch(0.93 0 0))` : "oklch(0.92 0 0)") : (tint ?? "var(--muted)"),
+  } as CSSProperties;
+  return (
+    <div aria-hidden className="grid size-full place-items-center rounded-md bg-(--tile) dark:bg-(--tile-dark)" style={style}>
+      <FeedIcon feed={feed} bare className={cn(compact ? "size-5" : "size-6 sm:size-7", "text-xs")} />
+    </div>
   );
 }
 

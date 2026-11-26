@@ -11,9 +11,12 @@ import { cn } from "@/lib/utils";
 export function FeedIcon({
   feed,
   className,
+  bare,
 }: {
   feed: Pick<Feed, "title" | "url" | "siteUrl">;
   className?: string;
+  /** Leave out the light tile behind dark icons: the parent draws it (see iconNeedsTile). */
+  bare?: boolean;
 }) {
   const host = hostname(feed.siteUrl ?? feed.url);
   const [state, setState] = useState<"loading" | "ok" | "failed">(host ? "loading" : "failed");
@@ -25,7 +28,7 @@ export function FeedIcon({
     <span
       className={cn(
         "grid size-4 shrink-0 place-items-center overflow-hidden rounded-sm",
-        needsTile && "dark:bg-neutral-200 dark:p-px",
+        needsTile && !bare && "dark:bg-neutral-200 dark:p-px",
         className,
       )}
     >
@@ -115,6 +118,12 @@ function load(): Record<string, boolean> {
     }
   }
   return memo!;
+}
+
+/** Whether this feed's icon is dark on see-through, so needs a light tile in dark mode. */
+export function iconNeedsTile(feed: Pick<Feed, "url" | "siteUrl">): boolean {
+  const host = hostname(feed.siteUrl ?? feed.url);
+  return !!host && !!cachedTile(host);
 }
 
 function cachedTile(host: string): boolean | undefined {

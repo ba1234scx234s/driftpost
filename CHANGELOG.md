@@ -2,6 +2,14 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.14.0 (27 November 2026)
+
+### New
+- Settings → Reading → Thumbnails: Image (the post's picture, or the feed's icon when there's none), Feed icon (the feed's icon for every post) or None. It replaces the "Show thumbnails" switch; if you'd turned that off, you get None.
+
+### Changed
+- In lists with pictures, a post without one shows its feed's icon on a tile in the feed's colour, so rows line up and feeds are easy to tell apart. Dark icons that need a light backing in dark mode get a pale tile in their own colour (light grey if they have none). Broken pictures get the tile too.
+
 ## 0.13.2 (27 November 2026)
 
 ### Changed

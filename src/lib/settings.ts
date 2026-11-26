@@ -49,8 +49,8 @@ export interface Settings {
   hideReadFeeds: boolean;
   /** Mark posts read when they scroll up past the top of the list. */
   markReadOnScroll: boolean;
-  /** Show post images next to titles in lists. */
-  showThumbnails: boolean;
+  /** What sits next to each title in lists: the post's picture, the feed's icon, or nothing. */
+  thumbnails: Thumbnails;
   /** Show the short description under each title in lists. */
   showSummaries: boolean;
   /** Unread dots take the main colour of each feed's icon. */
@@ -64,6 +64,13 @@ export interface Settings {
   /** "Later" on the backup reminder: don't ask again before this time. */
   backupSnoozedUntil?: number;
 }
+
+export const THUMBNAILS = {
+  image: { label: "Image", hint: "The post's picture when it has one, otherwise the feed's icon." },
+  icon: { label: "Feed icon", hint: "The feed's icon on a tile in its colour, for every post." },
+  none: { label: "None", hint: "Just the text: titles use the full width." },
+} as const;
+export type Thumbnails = keyof typeof THUMBNAILS;
 
 export const OPEN_IN = {
   reader: { label: "In app", hint: "The article's text, in Driftpost's own layout." },
@@ -82,7 +89,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hideRead: true,
   hideReadFeeds: false,
   markReadOnScroll: true,
-  showThumbnails: true,
+  thumbnails: "image",
   showSummaries: true,
   colorDots: true,
   openIn: "reader",
@@ -96,8 +103,14 @@ const KEY = "prefs";
  */
 const PREFS_VERSION = 2;
 
-function load(value: (Partial<Settings> & { v?: number }) | undefined): Settings {
+function load(
+  value: (Partial<Settings> & { v?: number; showThumbnails?: boolean }) | undefined,
+): Settings {
   const saved = { ...value };
+  // "Show thumbnails" was an on/off switch before the three choices.
+  if (saved.showThumbnails === false && !saved.thumbnails) saved.thumbnails = "none";
+  delete saved.showThumbnails;
+  if (!(String(saved.thumbnails) in THUMBNAILS)) delete saved.thumbnails;
   if ((saved.v ?? 1) < 2) delete saved.hideRead;
   delete saved.v;
   return { ...DEFAULT_SETTINGS, ...saved };
