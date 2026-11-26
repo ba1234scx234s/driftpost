@@ -1,23 +1,10 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { CircleAlertIcon, InboxIcon, SunIcon, Trash2Icon } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { CircleAlertIcon, InboxIcon, SunIcon } from "lucide-react";
 import { FeedIcon } from "@/components/feed-icon";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { db, type Feed } from "@/lib/db";
-import { unsubscribe } from "@/lib/feeds";
 import { cn } from "@/lib/utils";
 import { useSettings, type FilterablePost } from "@/lib/settings";
 import { startOfToday, type Screen } from "@/lib/views";
@@ -78,14 +65,6 @@ export function FeedSidebar({ selected, onSelect, hidden }: Props) {
             label={feed.title}
             count={unread?.counts.get(feed.id)}
             error={feed.lastError}
-            action={
-              <RemoveFeed
-                feed={feed}
-                onRemoved={() => {
-                  if (selected === feed.id) onSelect("all");
-                }}
-              />
-            }
           />
         ))}
         {readFeedCount > 0 && (
@@ -115,7 +94,6 @@ export function SidebarRow(props: {
   label: string;
   count?: number;
   error?: string;
-  action?: React.ReactNode;
 }) {
   return (
     <div
@@ -141,50 +119,9 @@ export function SidebarRow(props: {
           </Tooltip>
         )}
         {!!props.count && (
-          <span
-            className={cn(
-              "text-muted-foreground ml-auto pl-2 text-xs tabular-nums",
-              // Make room for the unfollow button on hover.
-              props.action && "group-focus-within:hidden group-hover:hidden",
-            )}
-          >
-            {props.count}
-          </span>
+          <span className="text-muted-foreground ml-auto pl-2 text-xs tabular-nums">{props.count}</span>
         )}
       </button>
-      {props.action && <div className="hidden group-focus-within:block group-hover:block">{props.action}</div>}
     </div>
-  );
-}
-
-function RemoveFeed({ feed, onRemoved }: { feed: Feed; onRemoved: () => void }) {
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon-xs" aria-label={`Unfollow ${feed.title}`}>
-          <Trash2Icon />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Unfollow {feed.title}?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Its posts are removed from Driftpost, including any you starred. You can follow it again later.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={async () => {
-              await unsubscribe(feed.id);
-              onRemoved();
-            }}
-          >
-            Unfollow
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   );
 }

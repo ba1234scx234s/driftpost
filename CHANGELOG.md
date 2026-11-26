@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 0.14.1 (27 November 2026)
+
+### Changed
+- The trash button no longer appears when you hover a feed in the sidebar, so unread counts stay put. Unfollow a feed from the ••• menu next to its name at the top of its list.
+
 ## 0.14.0 (27 November 2026)
 
 ### New
