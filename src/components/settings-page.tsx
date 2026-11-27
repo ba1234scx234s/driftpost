@@ -583,7 +583,7 @@ const FAQ: { q: string; a: ReactNode }[] = [
     q: "Is Driftpost really free?",
     a: (
       <>
-        Yes, and open source. There are no ads or paid plans. If you'd like to help with the server costs, you can{" "}
+        Yes, and open source. There are no ads or paid plans. If you'd like to help with the domain costs, you can{" "}
         <a href={KOFI_URL} target="_blank" rel="noreferrer" className="text-foreground underline underline-offset-4">
           buy me an iced coffee
         </a>

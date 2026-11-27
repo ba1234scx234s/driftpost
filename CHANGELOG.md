@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.6.6 (27 November 2026)
+
+### Changed
+- The FAQ says support goes towards the domain costs.
+
 ## 1.6.5 (27 November 2026)
 
 ### Changed
