@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.3.4 (27 November 2026)
+
+### Fixed
+- On phones, Discover no longer runs off the right-hand side of the screen.
+
 ## 1.3.3 (27 November 2026)
 
 ### New

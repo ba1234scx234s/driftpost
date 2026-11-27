@@ -85,7 +85,7 @@ export function DiscoverPage({ onShowFeed }: { onShowFeed: (feedId: number) => v
             <h3 id={`discover-${c.id}`} className="mb-3 text-sm font-medium">
               {c.label}
             </h3>
-            <ul className="grid gap-2 sm:grid-cols-2">
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {c.feeds.map((f) => (
                 <FeedCard
                   key={f.url}
@@ -134,7 +134,7 @@ function FeedCard(props: { feed: CatalogFeed; followedId?: number; onShowFeed: (
   return (
     <li
       className={cn(
-        "bg-card flex items-center gap-3 rounded-lg border p-3",
+        "bg-card flex min-w-0 items-center gap-3 rounded-lg border p-3",
         followedId && "bg-muted/40",
       )}
     >
