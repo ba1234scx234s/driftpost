@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, Rows3Icon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SunIcon, XIcon } from "lucide-react";
+import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, InfoIcon, Rows3Icon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { KOFI_URL } from "@/lib/kofi";
@@ -14,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { TOPIC_IDS, TOPICS, type TopicId } from "@/lib/topics";
 import { BackupSection } from "@/components/backup-section";
 import { OpmlSection } from "@/components/opml-section";
+import { Acknowledgement } from "@/components/acknowledgement";
 import { FontPicker } from "@/components/font-picker";
 import { ListItemPreview } from "@/components/item-list";
 import { useIsMobile, useIsTablet } from "@/hooks/use-is-mobile";
@@ -38,8 +39,8 @@ export const SETTINGS_SECTIONS = [
   { id: "article-list", label: "Article list", icon: Rows3Icon },
   { id: "reading", label: "Reading", icon: BookOpenIcon },
   { id: "filters", label: "Filters", icon: FilterIcon },
-  { id: "import-export", label: "Import and export", icon: ArrowDownUpIcon },
-  { id: "backup", label: "Backup", icon: ArchiveIcon },
+  { id: "import-export", label: "Import & export feeds", icon: ArrowDownUpIcon },
+  { id: "backup", label: "Backup & restore", icon: ArchiveIcon },
   { id: "privacy", label: "Privacy", icon: ShieldIcon },
   { id: "faq", label: "FAQ", icon: CircleHelpIcon },
   { id: "about", label: "About", icon: InfoIcon },
@@ -212,7 +213,7 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
     "import-export": (
       <Section
         id="import-export"
-        title="Import and export"
+        title="Import & export feeds"
         description="Move your subscriptions between Driftpost and other feed readers with an OPML file. Only the feeds come along, not posts or settings."
       >
         <OpmlSection />
@@ -220,7 +221,7 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
     ),
     "backup": (
       <Section
-        title="Backup"
+        title="Backup & restore"
         description="Everything in one file: your feeds, every post with its read status, your settings and filters. Driftpost only keeps your data in this browser, so a backup is how you move it or keep it safe."
       >
         <BackupSection />
@@ -243,7 +244,7 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
       </Section>
     ),
     "faq": (
-      <Section title="Questions and answers">
+      <Section title="FAQ">
         <Faq />
       </Section>
     ),
@@ -511,13 +512,7 @@ function About() {
           Buy me an iced coffee on Ko-fi
         </a>
       </div>
-      <p>
-        We acknowledge the Traditional Owners of the lands across Australia as the continuing custodians of Country
-        and Culture. We pay our respect to First Nations peoples and their Elders, past and present.
-      </p>
-      <p className="flex items-center gap-1">
-        Made with <HeartIcon className="size-3.5 fill-current text-red-500" aria-label="love" /> in Melbourne, Australia.
-      </p>
+      <Acknowledgement />
     </div>
   );
 }
@@ -529,7 +524,7 @@ const FAQ: { q: string; a: ReactNode }[] = [
   },
   {
     q: "What happens if I clear my browsing data?",
-    a: "Your feeds, read status and settings are erased with it. Download a backup now and then (Configure → Backup) and restore it if that happens.",
+    a: "Your feeds, read status and settings are erased with it. Download a backup now and then (Configure → Backup & restore) and restore it if that happens.",
   },
   {
     q: "Can my browser remove my feeds on its own?",
@@ -569,7 +564,7 @@ const FAQ: { q: string; a: ReactNode }[] = [
   },
   {
     q: "Can I bring my feeds from another reader?",
-    a: "Yes. Export an OPML file from Feedly, Inoreader, NetNewsWire or most other readers and import it under Configure → Import and export.",
+    a: "Yes. Export an OPML file from Feedly, Inoreader, NetNewsWire or most other readers and import it under Configure → Import & export feeds.",
   },
   {
     q: "How often do feeds update?",

@@ -56,7 +56,7 @@ export default function App() {
   const addInput = useRef<HTMLInputElement>(null);
   // A request to open Configure at one part; n changes so the same part can be asked for again.
   const [settingsJump, setSettingsJump] = useState<{ section: SettingsSectionId; n: number }>();
-  // Opens Configure at Import and export.
+  // Opens Configure at Import & export feeds.
   const showImportExport = useCallback(() => {
     setSettingsJump((prev) => ({ section: "import-export", n: (prev?.n ?? 0) + 1 }));
     setScreen("settings");
@@ -376,7 +376,6 @@ export default function App() {
         ) : feeds && feeds.length === 0 ? (
           <Welcome
             onDiscover={() => setScreen("discover")}
-            onSettings={showImportExport}
             onOpenMenu={isMobile ? () => setMenuOpen(true) : undefined}
           />
         ) : (

@@ -6,8 +6,36 @@ import { exportOpml, importOpml } from "@/lib/feeds";
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 
-/** Configure → Import and export: move subscriptions to and from other feed readers. */
+/** Configure → Import & export feeds: move subscriptions to and from other feed readers. */
 export function OpmlSection() {
+  async function handleExport() {
+    const { text, count } = await exportOpml();
+    if (!count) {
+      toast("You don't follow any feeds yet");
+      return;
+    }
+    const url = URL.createObjectURL(new Blob([text], { type: "text/x-opml;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `driftpost-subscriptions-${new Date().toISOString().slice(0, 10)}.opml`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast.success(`Exported ${count} ${count === 1 ? "feed" : "feeds"}`);
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <ImportOpmlButton />
+      <Button variant="outline" onClick={handleExport}>
+        <DownloadIcon />
+        Export OPML
+      </Button>
+    </div>
+  );
+}
+
+/** Picks an OPML file from another feed reader and follows every feed in it. */
+export function ImportOpmlButton({ label = "Import OPML" }: { label?: string }) {
   const fileInput = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
@@ -38,30 +66,11 @@ export function OpmlSection() {
     }
   }
 
-  async function handleExport() {
-    const { text, count } = await exportOpml();
-    if (!count) {
-      toast("You don't follow any feeds yet");
-      return;
-    }
-    const url = URL.createObjectURL(new Blob([text], { type: "text/x-opml;charset=utf-8" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `driftpost-subscriptions-${new Date().toISOString().slice(0, 10)}.opml`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast.success(`Exported ${count} ${count === 1 ? "feed" : "feeds"}`);
-  }
-
   return (
-    <div className="flex flex-wrap gap-2">
+    <>
       <Button variant="outline" onClick={() => fileInput.current?.click()} disabled={busy}>
         {busy ? <Loader2Icon className="animate-spin" /> : <UploadIcon />}
-        Import OPML…
-      </Button>
-      <Button variant="outline" onClick={handleExport}>
-        <DownloadIcon />
-        Export OPML
+        {label}
       </Button>
       <input
         ref={fileInput}
@@ -70,7 +79,7 @@ export function OpmlSection() {
         className="hidden"
         onChange={handleFile}
       />
-    </div>
+    </>
   );
 }
 

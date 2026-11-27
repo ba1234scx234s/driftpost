@@ -2,6 +2,15 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.6.2 (27 November 2026)
+
+### Changed
+- The welcome screen has Import OPML and Restore Driftpost backup buttons next to Discover, so you can bring your feeds over without going to Configure.
+- The welcome screen uses wide screens better, with its six points in three columns, and its tagline is shorter.
+- The welcome screen ends with the Acknowledgement of Country and "Made with ♥ in Melbourne, Australia."
+- Configure's sections are now called Import & export feeds, Backup & restore and FAQ, and the headings match the side menu.
+- The backup buttons have new icons.
+
 ## 1.6.1 (27 November 2026)
 
 ### Changed

@@ -1,5 +1,5 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import { DownloadIcon, Loader2Icon, UploadIcon } from "lucide-react";
+import { HardDriveDownloadIcon, HardDriveUploadIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -24,12 +24,9 @@ import {
 
 type Pending = { backup: ReturnType<typeof readBackup>; summary: BackupSummary };
 
-/** Configure → Backup: download everything as one file, or restore from one. */
+/** Configure → Backup & restore: download everything as one file, or restore from one. */
 export function BackupSection() {
-  const fileInput = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
-  const [pending, setPending] = useState<Pending | null>(null);
-  const [restoring, setRestoring] = useState(false);
 
   async function download() {
     setSaving(true);
@@ -42,6 +39,25 @@ export function BackupSection() {
       setSaving(false);
     }
   }
+
+  return (
+    <>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" onClick={download} disabled={saving}>
+          {saving ? <Loader2Icon className="animate-spin" /> : <HardDriveDownloadIcon />}
+          Download backup
+        </Button>
+        <RestoreBackupButton />
+      </div>
+    </>
+  );
+}
+
+/** Picks a Driftpost backup file and, once confirmed, replaces everything in this browser with it. */
+export function RestoreBackupButton({ label = "Restore from backup" }: { label?: string }) {
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [pending, setPending] = useState<Pending | null>(null);
+  const [restoring, setRestoring] = useState(false);
 
   async function pick(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -72,17 +88,11 @@ export function BackupSection() {
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" onClick={download} disabled={saving}>
-          {saving ? <Loader2Icon className="animate-spin" /> : <DownloadIcon />}
-          Download backup
-        </Button>
-        <Button variant="outline" onClick={() => fileInput.current?.click()}>
-          <UploadIcon />
-          Restore from backup…
-        </Button>
-        <input ref={fileInput} type="file" accept=".json,application/json" className="hidden" onChange={pick} />
-      </div>
+      <Button variant="outline" onClick={() => fileInput.current?.click()}>
+        <HardDriveUploadIcon />
+        {label}
+      </Button>
+      <input ref={fileInput} type="file" accept=".json,application/json" className="hidden" onChange={pick} />
 
       <AlertDialog open={!!pending} onOpenChange={(open) => !open && !restoring && setPending(null)}>
         <AlertDialogContent>
