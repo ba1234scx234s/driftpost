@@ -108,6 +108,7 @@ export async function refreshFeed(feed: Feed): Promise<number> {
     const current = await db.feeds.get(feed.id);
     if (!current) return 0;
     const added = await storeItems(feed.id, parsed, now);
+    await pruneOldPosts(feed.id, parsed, now);
     const wait = await intervalFor(feed.id, parsed.ttlMinutes, now);
     await db.feeds.update(feed.id, {
       // Keep the feed's own title fresh, unless you renamed it.
@@ -383,6 +384,24 @@ export function refreshAll({ all = false }: { all?: boolean } = {}): Promise<num
 
 export function isRefreshing(): boolean {
   return running !== null;
+}
+
+/** Read posts are kept this long (by publish date) before they're removed. */
+export const KEEP_READ_DAYS = 90;
+
+/**
+ * Removes read posts older than 90 days, so storage doesn't grow forever. Starred posts
+ * stay, and so do posts the feed still lists: removing those would bring them back as
+ * unread on the next refresh.
+ */
+async function pruneOldPosts(feedId: number, feed: ParsedFeed, now: number): Promise<void> {
+  const cutoff = now - KEEP_READ_DAYS * 24 * 60 * 60 * 1000;
+  const listed = new Set(feed.items.map((it) => it.guid));
+  await db.items
+    .where("[feedId+published]")
+    .between([feedId, -Infinity], [feedId, cutoff])
+    .filter((it) => it.read === 1 && it.starred !== 1 && !listed.has(it.guid))
+    .delete();
 }
 
 async function storeItems(feedId: number, feed: ParsedFeed, now: number): Promise<number> {

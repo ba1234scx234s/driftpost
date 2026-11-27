@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, CodeIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, MessageSquareWarningIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
+import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, CodeIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, MessageSquareWarningIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { KOFI_URL } from "@/lib/kofi";
@@ -39,6 +39,7 @@ export const SETTINGS_SECTIONS = [
   { id: "import-export", label: "Import and export", icon: ArrowDownUpIcon },
   { id: "backup", label: "Backup", icon: ArchiveIcon },
   { id: "privacy", label: "Privacy", icon: ShieldIcon },
+  { id: "faq", label: "FAQ", icon: CircleHelpIcon },
   { id: "about", label: "About", icon: InfoIcon },
 ] as const;
 export type SettingsSectionId = (typeof SETTINGS_SECTIONS)[number]["id"];
@@ -207,6 +208,11 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
     "privacy": (
       <Section title="Privacy">
         <PrivacyNote />
+      </Section>
+    ),
+    "faq": (
+      <Section title="Questions and answers">
+        <Faq />
       </Section>
     ),
     "about": (
@@ -483,6 +489,102 @@ function About() {
       <p className="flex items-center gap-1">
         Made with <HeartIcon className="size-3.5 fill-current text-red-500" aria-label="love" /> in Melbourne, Australia.
       </p>
+    </div>
+  );
+}
+
+const FAQ: { q: string; a: ReactNode }[] = [
+  {
+    q: "Where are my feeds kept?",
+    a: "Only in this browser, on this device. There's no account and no copy on a server, so nobody else can see what you follow or read.",
+  },
+  {
+    q: "What happens if I clear my browsing data?",
+    a: "Your feeds, read status and settings are erased with it. Download a backup now and then (Settings → Backup) and restore it if that happens.",
+  },
+  {
+    q: "Can my browser remove my feeds on its own?",
+    a: (
+      <>
+        It depends on the browser:
+        <span className="mt-2 flex flex-col gap-1.5">
+          <span>
+            <strong className="text-foreground font-medium">Chrome, Edge and Android:</strong> Driftpost asks to keep
+            its data for good, so it's only removed if you clear it yourself.
+          </span>
+          <span>
+            <strong className="text-foreground font-medium">Firefox:</strong> the same, though Firefox may ask you
+            first.
+          </span>
+          <span>
+            <strong className="text-foreground font-medium">Safari on Mac, iPhone and iPad:</strong> Safari clears a
+            site's data when you haven't opened it for 7 days. Open Driftpost at least once a week, or add it to your
+            Home Screen, where that rule doesn't apply.
+          </span>
+        </span>
+        <span className="mt-2 block">A backup keeps you safe in every browser.</span>
+      </>
+    ),
+  },
+  {
+    q: "How long are posts kept?",
+    a: "Unread and starred posts stay until you unfollow their feed. Read posts are removed 90 days after they were published, once the feed itself no longer lists them, so Driftpost doesn't fill up your device.",
+  },
+  {
+    q: "Can I use Driftpost on my phone and computer together?",
+    a: "Yes, but they don't sync: each browser keeps its own feeds and read status. To move everything across, download a backup on one and restore it on the other.",
+  },
+  {
+    q: "How do I follow a site that isn't in Discover?",
+    a: "Press + next to the logo and paste the site's address. Driftpost finds its feed for you. Sites without an RSS, Atom or JSON feed can't be followed.",
+  },
+  {
+    q: "Can I bring my feeds from another reader?",
+    a: "Yes. Export an OPML file from Feedly, Inoreader, NetNewsWire or most other readers and import it under Settings → Import and export.",
+  },
+  {
+    q: "How often do feeds update?",
+    a: "While Driftpost is open, each feed is checked on its own schedule: busy news sites every 30 minutes, quieter blogs every few hours. The refresh button at the top of the list checks them all straight away.",
+  },
+  {
+    q: "Why do some articles only show a summary?",
+    a: "Some feeds only include a preview. Driftpost then tries to load the full text from the site, but some sites block that. \"Open original\" always takes you to the article itself.",
+  },
+  {
+    q: "What does the red warning next to a feed mean?",
+    a: "Its last refresh failed: the site may be down, or the feed may have moved. Hover over the warning for details. Driftpost keeps trying, waiting a little longer each time.",
+  },
+  {
+    q: "Can I install Driftpost as an app?",
+    a: "Yes. On iPhone and iPad, tap Share → Add to Home Screen in Safari. On Android and on desktop Chrome or Edge, choose Install app from the browser menu.",
+  },
+  {
+    q: "Is Driftpost really free?",
+    a: (
+      <>
+        Yes, and open source. There are no ads or paid plans. If you'd like to help with the server costs, you can{" "}
+        <a href={KOFI_URL} target="_blank" rel="noreferrer" className="text-foreground underline underline-offset-4">
+          buy me an iced coffee
+        </a>
+        .
+      </>
+    ),
+  },
+];
+
+/** Common questions, each one opening to its answer. */
+function Faq() {
+  return (
+    <div className="flex max-w-prose flex-col">
+      {FAQ.map(({ q, a }) => (
+        <details key={q} className="group border-b last:border-b-0">
+          <summary className="hover:text-foreground flex cursor-pointer list-none items-center justify-between gap-4 py-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
+            {q}
+            <ChevronDownIcon className="text-muted-foreground size-4 shrink-0 transition-transform group-open:rotate-180" aria-hidden />
+          </summary>
+          <p className="text-muted-foreground pb-4 text-sm">{a}</p>
+        </details>
+      ))}
     </div>
   );
 }
