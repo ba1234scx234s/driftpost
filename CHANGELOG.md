@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.0.1 (27 November 2026)
+
+### New
+- Settings → About has an email address for questions and feedback: driftpost_app@pm.me.
+
 ## 1.0.0 (27 November 2026)
 
 Driftpost 1.0: the first stable version. Nothing new since 0.14.1; this marks the point where everything below has settled. In short, Driftpost is:

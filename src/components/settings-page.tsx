@@ -466,6 +466,15 @@ function About() {
           <MessageSquareWarningIcon className="size-4" aria-hidden />
           Report a problem or idea
         </a>
+      </div>
+      <p>
+        For questions or feedback, please reach out to{" "}
+        <a href="mailto:driftpost_app@pm.me" className="text-foreground underline underline-offset-4">
+          driftpost_app@pm.me
+        </a>
+        .
+      </p>
+      <div>
         <a href={KOFI_URL} target="_blank" rel="noreferrer" className={link}>
           <CupSodaIcon className="size-4" aria-hidden />
           Buy me an iced coffee on Ko-fi
