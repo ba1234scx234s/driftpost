@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.6.1 (27 November 2026)
+
+### Changed
+- Feeds with nothing unread now always sit behind the "N feeds read" link in the sidebar. Tap it to see all your feeds. The Hide read feeds switch is gone from Configure.
+
 ## 1.6.0 (27 November 2026)
 
 ### New

@@ -45,7 +45,7 @@ Hide posts by topic (Sport, Politics, Business…), by words in the title, or by
 ### Keeps the noise down
 
 - **Hide read posts:** lists show only what's new. A post you open stays put until you switch lists, so the arrow keys keep working.
-- **Hide read feeds:** feeds with nothing unread tuck away behind an "N feeds read" link.
+- **Read feeds tuck away:** feeds with nothing unread sit behind an "N feeds read" link in the sidebar. Tap it to see them all.
 - **Mark as read while scrolling**, and **Today** for just the day's posts.
 - **No duplicates:** the same feed is caught even when it hides behind a different address.
 

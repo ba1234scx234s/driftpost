@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { db, type Feed } from "@/lib/db";
 import { cn } from "@/lib/utils";
-import { useSettings, type FilterablePost } from "@/lib/settings";
+import { type FilterablePost } from "@/lib/settings";
 import { startOfToday, type Screen } from "@/lib/views";
 
 interface Props {
@@ -31,11 +31,10 @@ export function FeedSidebar({ selected, onSelect, hidden }: Props) {
     return { counts, today: todayCount };
   }, [today, hidden]);
 
-  // "Hide read feeds": feeds with nothing unread go behind a link, except the one you're in.
-  const { hideReadFeeds } = useSettings();
+  // Feeds with nothing unread go behind a "N feeds read" link, except the one you're in.
   const [showReadFeeds, setShowReadFeeds] = useState(false);
   const isRead = (feed: Feed) => !!unread && !unread.counts.get(feed.id) && selected !== feed.id;
-  const readFeedCount = hideReadFeeds ? feeds.filter(isRead).length : 0;
+  const readFeedCount = feeds.filter(isRead).length;
   const shownFeeds = readFeedCount && !showReadFeeds ? feeds.filter((f) => !isRead(f)) : feeds;
 
   return (
