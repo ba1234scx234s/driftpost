@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.6.9 (27 November 2026)
+
+### Fixed
+- Ko-fi links go to Driftpost's tip page.
+
 ## 1.6.8 (27 November 2026)
 
 ### Changed

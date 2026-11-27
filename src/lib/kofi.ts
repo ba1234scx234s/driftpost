@@ -4,7 +4,7 @@
 
 import { getSettings, updateSettings } from "./settings";
 
-export const KOFI_URL = "https://ko-fi.com/W2X42BCT3X";
+export const KOFI_URL = "https://ko-fi.com/driftpost/tip";
 
 const COUNT_KEY = "driftpost:caught-up-count";
 /** Earlier versions only paused the prompt for 180 days, in localStorage. */
