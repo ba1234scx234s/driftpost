@@ -465,22 +465,18 @@ function About() {
   return (
     <div className="text-muted-foreground flex flex-col gap-3 text-sm">
       <p>
-        Driftpost{" "}
-        <a href={`${REPO_URL}/releases`} target="_blank" rel="noreferrer" className={inline} title="What's new">
-          {__APP_VERSION__}
-        </a>
-        . Free and{" "}
-        <a href={REPO_URL} target="_blank" rel="noreferrer" className={inline}>
-          open source
-        </a>{" "}
-        under the MIT licence.
+        Driftpost {__APP_VERSION__}. Free and open source under the MIT licence.
       </p>
       <p>
         For questions or feedback, please reach out to{" "}
         <a href="mailto:driftpost_app@pm.me" className="text-foreground underline underline-offset-4">
           driftpost_app@pm.me
-        </a>
-        .
+        </a>{" "}
+        or{" "}
+        <a href={`${REPO_URL}/issues`} target="_blank" rel="noreferrer" className={inline}>
+          submit an issue
+        </a>{" "}
+        on GitHub.
       </p>
       <div>
         <a href={KOFI_URL} target="_blank" rel="noreferrer" className={link}>

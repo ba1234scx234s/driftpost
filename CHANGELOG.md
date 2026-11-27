@@ -2,6 +2,14 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.4.0 (27 November 2026)
+
+### New
+- Configure → About links to GitHub, where you can submit an issue.
+
+### Changed
+- On tablets, opening an article tucks the sidebar into the menu, so the article list and the article share the screen. The sidebar comes back when you close the article.
+
 ## 1.3.4 (27 November 2026)
 
 ### Fixed

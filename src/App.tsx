@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile, useIsTablet } from "@/hooks/use-is-mobile";
 import { useVisibleItems } from "@/hooks/use-visible-items";
 import { db, requestPersistence, type Item } from "@/lib/db";
 import { markAllRead, markUnread, unreadInView } from "@/lib/feeds";
@@ -46,6 +46,7 @@ export default function App() {
   const feeds = useLiveQuery(() => db.feeds.toArray(), []);
   const [addOpen, setAddOpen] = useState(false);
   const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
   const [menuOpen, setMenuOpen] = useState(false);
   /** Go somewhere from the sidebar; on phones that also closes the menu. */
   const go = useCallback((next: Screen) => {
@@ -80,6 +81,9 @@ export default function App() {
 
   const openIn = settings.openIn;
   const readerOpen = !!selected && openIn !== "tab" && isList;
+  // The sidebar is a slide-in menu on phones, and on tablets while an article is open, so the
+  // list and the article share the screen.
+  const menuMode = isMobile || (isTablet && readerOpen);
 
   const markRead = useCallback((item: Item) => {
     // Keep every opened post in this list until you leave it (see useVisibleItems).
@@ -295,7 +299,7 @@ export default function App() {
 
   return (
     <div className="bg-background text-foreground flex h-dvh">
-      {isMobile ? (
+      {menuMode ? (
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetContent
             side="left"
@@ -323,7 +327,7 @@ export default function App() {
         >
         <header className="flex h-13 shrink-0 items-center gap-3 border-b px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-1">
-            {isMobile && (
+            {menuMode && (
               <Button variant="ghost" size="icon-sm" className="-ml-2" onClick={() => setMenuOpen(true)} aria-label="Open menu">
                 <MenuIcon />
               </Button>
