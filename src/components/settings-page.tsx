@@ -500,6 +500,10 @@ function PrivacyNote() {
         few minutes so they can be shared with other readers, and the number of requests from each internet
         address is counted briefly to stop misuse.
       </p>
+      <p>
+        If you pick a Google font under Appearance, it's loaded from Google, which then sees your IP address. The
+        built-in fonts don't contact anyone, and nothing is loaded from Google unless you choose one of its fonts.
+      </p>
       <p>Articles belong to the sites that publish them. Driftpost shows them for personal reading only.</p>
     </div>
   );

@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.1.4 (27 November 2026)
+
+### Changed
+- Settings → Privacy explains that Google Fonts are loaded from Google, which sees your IP address, and that built-in fonts don't contact anyone.
+
 ## 1.1.3 (27 November 2026)
 
 ### Changed
