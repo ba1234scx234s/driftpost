@@ -5,7 +5,7 @@ import {
   CompassIcon,
   EyeOffIcon,
   HardDriveIcon,
-  ListOrderedIcon,
+  WandSparklesIcon,
   UserRoundXIcon,
 } from "lucide-react";
 import { Acknowledgement } from "@/components/acknowledgement";
@@ -36,9 +36,9 @@ const POINTS: {
     text: "Nobody watches what you read, and nothing on the page is trying to sell you something.",
   },
   {
-    icon: ListOrderedIcon,
+    icon: WandSparklesIcon,
     title: "No algorithm",
-    text: "Just the posts from the sites you choose, newest first. Nothing is ranked, boosted or buried.",
+    text: "Just the posts from the sites you choose, newest first. Nothing is ranked, boosted, or promoted.",
   },
   {
     icon: BotOffIcon,

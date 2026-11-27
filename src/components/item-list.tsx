@@ -9,6 +9,7 @@ import { db, type Feed, type Item } from "@/lib/db";
 import { cachedIconColor, dotColor, iconHost, loadIconColor } from "@/lib/icon-color";
 import { showsPostTime, useSettings } from "@/lib/settings";
 import { KofiNote } from "@/components/kofi-note";
+import { pickCalmLine } from "@/lib/calm";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import type { View } from "@/lib/views";
@@ -308,12 +309,18 @@ function useDotColors(feeds: Feed[] | undefined, enabled: boolean): Map<number, 
   return colors;
 }
 
-/** "You're all caught up", and every 5th time a quiet Ko-fi prompt under it. */
+/** "You're all caught up" with a calm line, or every 5th time a quiet Ko-fi prompt instead. */
 function CaughtUp() {
+  // Picked once per showing, so it doesn't change while the list updates.
+  const [line] = useState(pickCalmLine);
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-1">
       <p>You're all caught up.</p>
-      <KofiNote />
+      {/* The calm line shows when the Ko-fi prompt doesn't, so there's only ever one extra. */}
+      <KofiNote
+        className="mt-5"
+        otherwise={<p className="text-foreground/80 animate-in fade-in italic duration-700">{line}</p>}
+      />
     </div>
   );
 }

@@ -2,6 +2,15 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.6.3 (27 November 2026)
+
+### New
+- "You're all caught up" comes with a short calm line, like "The tide can wait." or "Breathe in. Breathe out.", a different one each time (except when the Ko-fi note shows).
+
+### Changed
+- On the welcome screen, "No algorithm" has a new icon and now says nothing is ranked, boosted, or promoted.
+- The Ko-fi button is easier to spot.
+
 ## 1.6.2 (27 November 2026)
 
 ### Changed
