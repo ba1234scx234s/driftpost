@@ -189,7 +189,7 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
     "backup": (
       <Section
         title="Backup"
-        description="Everything in one file: your feeds, every post with its read and starred status, your settings and filters. Driftpost only keeps your data in this browser, so a backup is how you move it or keep it safe."
+        description="Everything in one file: your feeds, every post with its read status, your settings and filters. Driftpost only keeps your data in this browser, so a backup is how you move it or keep it safe."
       >
         <BackupSection />
         <Row
@@ -528,7 +528,7 @@ const FAQ: { q: string; a: ReactNode }[] = [
   },
   {
     q: "How long are posts kept?",
-    a: "Unread and starred posts stay until you unfollow their feed. Read posts are removed 90 days after they were published, once the feed itself no longer lists them, so Driftpost doesn't fill up your device.",
+    a: "Unread posts stay until you unfollow their feed. Read posts are removed 90 days after they were published, once the feed itself no longer lists them, so Driftpost doesn't fill up your device.",
   },
   {
     q: "Can I use Driftpost on my phone and computer together?",

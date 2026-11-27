@@ -8,7 +8,7 @@ What's new in each version of Driftpost. Each version is also a [release on GitH
 - Questions and answers in Settings, between Privacy and About: where your feeds are kept, clearing browsing data, using more than one device, following any site, importing from another reader, how often feeds update, summaries, failed feeds, installing as an app, and whether it's really free. Also what each browser does with stored data (Safari clears it after 7 days without a visit), and how long posts are kept.
 
 ### Changed
-- Read posts are removed 90 days after they were published, once their feed no longer lists them, so storage doesn't keep growing. Unread and starred posts stay.
+- Read posts are removed 90 days after they were published, once their feed no longer lists them, so storage doesn't keep growing. Unread posts stay.
 
 ## 1.1.5 (27 November 2026)
 

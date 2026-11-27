@@ -64,7 +64,7 @@ export function FeedMenu({ feed, onUnfollowed }: { feed: Feed; onUnfollowed: () 
           <AlertDialogHeader>
             <AlertDialogTitle>Unfollow {feed.title}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Its posts are removed from Driftpost, including any you starred. You can follow it again later.
+              Its posts are removed from Driftpost. You can follow it again later.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
