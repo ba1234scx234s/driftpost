@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.6.8 (27 November 2026)
+
+### Changed
+- After you follow any Ko-fi link in Driftpost, the Ko-fi note under "You're all caught up" stays away for 180 days. Backups now remember when, so restoring one doesn't reset the 180 days.
+
 ## 1.6.7 (27 November 2026)
 
 ### Changed

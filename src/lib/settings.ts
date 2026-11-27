@@ -78,6 +78,8 @@ export interface Settings {
   backupReminder: boolean;
   /** When a backup was last downloaded (ms since 1970). */
   lastBackupAt?: number;
+  /** When a Ko-fi link was last followed (ms since 1970). The caught-up prompt stays away for 180 days. */
+  kofiFollowedAt?: number;
   /** "Later" on the backup reminder: don't ask again before this time. */
   backupSnoozedUntil?: number;
 }

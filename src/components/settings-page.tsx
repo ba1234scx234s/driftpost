@@ -15,7 +15,7 @@ import { BackupSection } from "@/components/backup-section";
 import { OpmlSection } from "@/components/opml-section";
 import { Acknowledgement } from "@/components/acknowledgement";
 import { KofiButton } from "@/components/kofi-note";
-import { KOFI_URL } from "@/lib/kofi";
+import { KOFI_URL, rememberKofiFollowed } from "@/lib/kofi";
 import { FontPicker } from "@/components/font-picker";
 import { ListItemPreview } from "@/components/item-list";
 import { useIsMobile, useIsTablet } from "@/hooks/use-is-mobile";
@@ -584,7 +584,13 @@ const FAQ: { q: string; a: ReactNode }[] = [
     a: (
       <>
         Yes, and open source. There are no ads or paid plans. If you'd like to help with the domain costs, you can{" "}
-        <a href={KOFI_URL} target="_blank" rel="noreferrer" className="text-foreground underline underline-offset-4">
+        <a
+          href={KOFI_URL}
+          target="_blank"
+          rel="noreferrer"
+          onClick={rememberKofiFollowed}
+          className="text-foreground underline underline-offset-4"
+        >
           buy me an iced coffee
         </a>
         .
