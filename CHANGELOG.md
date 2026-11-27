@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.4.6 (27 November 2026)
+
+### Changed
+- At the XXL and XXXL text sizes, lists leave out when each post was published, so the feed's name has room. The article itself still shows its date.
+
 ## 1.4.5 (27 November 2026)
 
 ### Fixed

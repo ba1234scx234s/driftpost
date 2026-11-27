@@ -17,6 +17,11 @@ export const SIZES = {
 } as const;
 export type SizeId = keyof typeof SIZES;
 
+/** At the largest text sizes the lists leave out each post's time, to give the feed name room. */
+export function showsPostTime(size: SizeId): boolean {
+  return size !== "xxl" && size !== "xxxl";
+}
+
 /** The text size to use, in pixels. */
 export function sizeOf(settings: Pick<Settings, "size">): number {
   return (SIZES[settings.size] ?? SIZES.m).px;

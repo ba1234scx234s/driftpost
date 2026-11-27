@@ -7,7 +7,7 @@ import { useMarkReadOnScroll } from "@/hooks/use-mark-read-on-scroll";
 import { Skeleton } from "@/components/ui/skeleton";
 import { db, type Feed, type Item } from "@/lib/db";
 import { cachedIconColor, dotColor, iconHost, loadIconColor } from "@/lib/icon-color";
-import { useSettings } from "@/lib/settings";
+import { showsPostTime, useSettings } from "@/lib/settings";
 import { KofiNote } from "@/components/kofi-note";
 import { relativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,7 @@ interface Props {
 }
 
 export function ItemList({ view, items, selectedId, onSelect, compact, onScrolledPast }: Props) {
-  const { hideRead, thumbnails, showSummaries, markReadOnScroll, colorDots } = useSettings();
+  const { hideRead, thumbnails, showSummaries, markReadOnScroll, colorDots, size } = useSettings();
   const listRef = useRef<HTMLOListElement>(null);
   useMarkReadOnScroll(listRef, items, markReadOnScroll, onScrolledPast);
   const feeds = useLiveQuery(() => db.feeds.toArray(), []);
@@ -75,6 +75,7 @@ export function ItemList({ view, items, selectedId, onSelect, compact, onScrolle
             dotColor={colorDots ? feedColors.get(item.feedId) : undefined}
             tileColor={feedColors.get(item.feedId)}
             showFeed={showFeed}
+            showTime={showsPostTime(size)}
             showThumbnail={thumbnails !== "none"}
             showImage={thumbnails === "image"}
             reserveThumbnail={reserveThumbnail}
@@ -124,7 +125,7 @@ const SAMPLE_ITEM: Item = {
 
 /** One list row drawn with the current Reading settings, for Configure. */
 export function ListItemPreview() {
-  const { thumbnails, showSummaries, colorDots } = useSettings();
+  const { thumbnails, showSummaries, colorDots, size } = useSettings();
   const { resolvedTheme } = useTheme();
   const color = dotColor(SAMPLE_COLOR, resolvedTheme === "dark");
   // "2 hours ago", whenever Configure is opened.
@@ -140,6 +141,7 @@ export function ListItemPreview() {
           tileColor={color}
           tileIcon={<DriftpostLogo className="size-7 sm:size-8" />}
           showFeed
+          showTime={showsPostTime(size)}
           showThumbnail={thumbnails !== "none"}
           showImage={thumbnails === "image"}
           reserveThumbnail
@@ -157,6 +159,8 @@ function ItemRow(props: {
   item: Item;
   feed?: Feed;
   showFeed: boolean;
+  /** The post's time ("2 hours ago"); left out at the largest text sizes. */
+  showTime: boolean;
   showThumbnail: boolean;
   /** Use the post's picture when it has one (otherwise always the feed's tile). */
   showImage: boolean;
@@ -207,10 +211,14 @@ function ItemRow(props: {
               />
             )}
             {showFeed && feedTitle && <span className="truncate">{feedTitle}</span>}
-            {showFeed && feedTitle && <span aria-hidden>·</span>}
-            <time dateTime={new Date(item.published).toISOString()} className="shrink-0">
-              {relativeTime(item.published)}
-            </time>
+            {props.showTime && (
+              <>
+                {showFeed && feedTitle && <span aria-hidden>·</span>}
+                <time dateTime={new Date(item.published).toISOString()} className="shrink-0">
+                  {relativeTime(item.published)}
+                </time>
+              </>
+            )}
           </div>
           <h2
             className={cn(
