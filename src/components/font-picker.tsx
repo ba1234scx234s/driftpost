@@ -60,7 +60,7 @@ export function FontPicker({ font }: { font: string }) {
         }
       >
         <Select value={choosing ? CUSTOM : font} onValueChange={choose}>
-          <SelectTrigger id="font" className="w-56">
+          <SelectTrigger id="font" className="w-56 max-w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

@@ -313,7 +313,7 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
           </button>
         ))}
       </nav>
-      <ScrollArea ref={scroller} className="min-h-0 flex-1">
+      <ScrollArea ref={scroller} className="min-h-0 min-w-0 flex-1">
         <div className="mx-auto flex max-w-2xl flex-col gap-8 px-4 py-6 sm:px-6">
           {SETTINGS_SECTIONS.map(({ id }, i) => (
             <div key={id} id={`settings-${id}`} className="flex scroll-mt-6 flex-col gap-8">
@@ -736,8 +736,9 @@ function PresetOrCustom(props: {
 
 /**
  * A setting: its name and hint on the left, the control on the right. The hint wraps
- * rather than pushing the control onto a line of its own. Wide controls (button rows,
- * menus) go under the text on phones, where there isn't room beside it.
+ * rather than pushing a switch onto a line of its own. Wide controls (button rows, menus)
+ * move under the text only when there isn't room beside it, and their buttons wrap too,
+ * so nothing runs off a narrow screen at any text size.
  */
 export function Row({
   label,
@@ -753,12 +754,12 @@ export function Row({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("flex items-center justify-between gap-x-6 gap-y-2", wide && "max-sm:flex-col max-sm:items-start")}>
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+    <div className={cn("flex items-center justify-between gap-x-6 gap-y-2", wide && "flex-wrap")}>
+      <div className={cn("flex min-w-0 flex-col gap-0.5", wide ? "flex-[1_1_14rem]" : "flex-1")}>
         <Label htmlFor={htmlFor}>{label}</Label>
         {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
       </div>
-      <div className="shrink-0">{children}</div>
+      <div className={wide ? "max-w-full [&_[data-slot=toggle-group]]:flex-wrap" : "shrink-0"}>{children}</div>
     </div>
   );
 }

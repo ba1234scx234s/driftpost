@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.4.3 (27 November 2026)
+
+### Fixed
+- On phones, Configure no longer runs off the right-hand side at larger text sizes. Rows of buttons wrap to fit the screen.
+
 ## 1.4.2 (27 November 2026)
 
 ### New
