@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.4.5 (27 November 2026)
+
+### Fixed
+- Pop-up messages at the bottom of the screen now follow your text size, instead of always using small text.
+
 ## 1.4.4 (27 November 2026)
 
 ### New

@@ -138,3 +138,18 @@
     cursor: pointer;
   }
 }
+/*
+ * Toasts: sonner sets its sizes in pixels, so they ignored the reader's text size. The same
+ * sizes in rem (13px text, 12px buttons, 356px wide at the default 16px) scale with it.
+ */
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"] {
+  padding: 1rem;
+  font-size: 0.8125rem;
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"] [data-button],
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"] [data-cancel] {
+  height: auto;
+  min-height: 1.5rem;
+  padding-inline: 0.5rem;
+  font-size: 0.75rem;
+}

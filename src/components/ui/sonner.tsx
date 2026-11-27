@@ -34,6 +34,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)",
+          // 356px at the default text size; grows with Driftpost's text size (see index.css).
+          "--width": "22.25rem",
         } as React.CSSProperties
       }
       toastOptions={{
