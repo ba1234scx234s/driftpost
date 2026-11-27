@@ -504,6 +504,11 @@ function PrivacyNote() {
         If you pick a Google font under Appearance, it's loaded from Google, which then sees your IP address. The
         built-in fonts don't contact anyone, and nothing is loaded from Google unless you choose one of its fonts.
       </p>
+      <p>
+        Post thumbnails and the pictures in articles load straight from the sites that publish them, so those sites
+        see your IP address, just as when you visit them. To keep the list from loading them, set Thumbnails to
+        Feed icon or None under Reading.
+      </p>
       <p>Articles belong to the sites that publish them. Driftpost shows them for personal reading only.</p>
     </div>
   );

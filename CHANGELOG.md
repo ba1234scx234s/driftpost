@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.1.5 (27 November 2026)
+
+### Changed
+- Settings → Privacy explains that post thumbnails and article pictures load from the sites that publish them, and how to keep the list from loading them.
+
 ## 1.1.4 (27 November 2026)
 
 ### Changed
