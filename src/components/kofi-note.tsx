@@ -26,8 +26,9 @@ export function KofiNote({ otherwise, className }: { otherwise?: ReactNode; clas
       )}
     >
       <p>
-        Enjoying Driftpost? It's free, with no ads or tracking. If you'd like to support it, you can buy me an iced
-        coffee.
+        Enjoying Driftpost?
+        <br />
+        It's free, with no ads or tracking. If you'd like to support it, you can buy me an iced coffee.
       </p>
       <Button size="sm" asChild>
         <a

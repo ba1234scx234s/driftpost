@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.6.4 (27 November 2026)
+
+### Changed
+- The Ko-fi note reads more easily, with its question on a line of its own.
+
 ## 1.6.3 (27 November 2026)
 
 ### New
