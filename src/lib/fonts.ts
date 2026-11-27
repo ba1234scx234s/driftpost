@@ -3,13 +3,13 @@
 
 export const BUILT_IN_FONTS = {
   geist: { label: "Geist", stack: "'Geist Variable', sans-serif" },
+  inter: { label: "Inter", stack: "'Inter Variable', sans-serif" },
+  plex: { label: "IBM Plex Sans", stack: "'IBM Plex Sans Variable', sans-serif" },
+  atkinson: { label: "Atkinson Hyperlegible", stack: "'Atkinson Hyperlegible', sans-serif" },
   system: { label: "System", stack: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" },
   serif: { label: "Serif", stack: "ui-serif, 'New York', Charter, Georgia, 'Times New Roman', serif" },
   mono: { label: "Mono", stack: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace" },
 } as const;
-
-/** Ready-made Google Fonts choices shown in the font menu. */
-export const SUGGESTED_GOOGLE_FONTS = ["Atkinson Hyperlegible"] as const;
 
 /** A few well-known families to try, shown under the custom font field. */
 export const GOOGLE_FONT_IDEAS = ["Inter", "Lora", "Literata", "Source Serif 4", "IBM Plex Sans", "Merriweather"];

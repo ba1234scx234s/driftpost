@@ -500,6 +500,10 @@ function About() {
           Buy me an iced coffee on Ko-fi
         </a>
       </div>
+      <p>
+        We acknowledge the Traditional Owners of the lands across Australia as the continuing custodians of Country
+        and Culture. We pay our respect to First Nations peoples and their Elders, past and present.
+      </p>
       <p className="flex items-center gap-1">
         Made with <HeartIcon className="size-3.5 fill-current text-red-500" aria-label="love" /> in Melbourne, Australia.
       </p>
@@ -745,14 +749,28 @@ export function Row({
   htmlFor,
   hint,
   wide,
+  stacked,
   children,
 }: {
   label: string;
   htmlFor: string;
   hint?: string;
   wide?: boolean;
+  /** Always put the control under the label, at full width up to its own size. */
+  stacked?: boolean;
   children: ReactNode;
 }) {
+  if (stacked) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <Label htmlFor={htmlFor}>{label}</Label>
+          {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
+        </div>
+        <div className="max-w-full">{children}</div>
+      </div>
+    );
+  }
   return (
     <div className={cn("flex items-center justify-between gap-x-6 gap-y-2", wide && "flex-wrap")}>
       <div className={cn("flex min-w-0 flex-col gap-0.5", wide ? "flex-[1_1_14rem]" : "flex-1")}>

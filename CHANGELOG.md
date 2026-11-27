@@ -2,6 +2,12 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.5.0 (27 November 2026)
+
+### New
+- Three more built-in fonts: Atkinson Hyperlegible, Inter and IBM Plex Sans. They come from Driftpost itself, so Google isn't contacted. If you used Atkinson Hyperlegible from Google Fonts, you're moved to the built-in one.
+- Configure → About includes an Acknowledgement of Country.
+
 ## 1.4.6 (27 November 2026)
 
 ### Changed

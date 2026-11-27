@@ -22,17 +22,15 @@ import {
   googleFontId,
   loadGoogleFont,
   normaliseFamily,
-  SUGGESTED_GOOGLE_FONTS,
   titleCase,
 } from "@/lib/fonts";
 import { updateSettings } from "@/lib/settings";
 
 const CUSTOM = "__custom";
 
-/** Font setting: built-in fonts, Atkinson Hyperlegible, or any family from Google Fonts. */
+/** Font setting: the built-in fonts, or any family from Google Fonts. */
 export function FontPicker({ font }: { font: string }) {
   const current = googleFamily(font);
-  const isCustom = !!current && !(SUGGESTED_GOOGLE_FONTS as readonly string[]).includes(current);
   const [choosing, setChoosing] = useState(false);
 
   // Google fonts are only fetched once one is picked (not to preview them in the menu),
@@ -52,7 +50,7 @@ export function FontPicker({ font }: { font: string }) {
       <Row
         label="Font"
         htmlFor="font"
-        wide
+        stacked
         hint={
           current || choosing
             ? "Google Fonts are loaded from Google, which then sees your IP address. Built-in fonts don't contact anyone."
@@ -75,12 +73,7 @@ export function FontPicker({ font }: { font: string }) {
             <SelectSeparator />
             <SelectGroup>
               <SelectLabel>Google Fonts</SelectLabel>
-              {SUGGESTED_GOOGLE_FONTS.map((family) => (
-                <SelectItem key={family} value={googleFontId(family)}>
-                  {family}
-                </SelectItem>
-              ))}
-              {isCustom && (
+              {current && (
                 <SelectItem value={font} style={{ fontFamily: fontStack(font) }}>
                   {current}
                 </SelectItem>

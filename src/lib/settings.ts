@@ -132,6 +132,9 @@ function load(
   if (saved.size !== undefined && !(saved.size in SIZES)) delete saved.size;
   delete (saved as { customSize?: number }).customSize;
   if ((saved.v ?? 1) < 2) delete saved.hideRead;
+  // These fonts used to come from Google Fonts and are now built in, so Google isn't contacted.
+  const builtIn: Record<string, string> = { "g:Atkinson Hyperlegible": "atkinson", "g:Inter": "inter", "g:IBM Plex Sans": "plex" };
+  if (saved.font && saved.font in builtIn) saved.font = builtIn[saved.font];
   delete saved.v;
   return { ...DEFAULT_SETTINGS, ...saved };
 }
