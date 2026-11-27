@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.6.7 (27 November 2026)
+
+### Changed
+- The Ko-fi button is now the dark version, with a faint edge in dark mode.
+
 ## 1.6.6 (27 November 2026)
 
 ### Changed

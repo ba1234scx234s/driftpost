@@ -51,7 +51,12 @@ export function KofiButton({ onClick }: { onClick?: () => void }) {
       onClick={onClick}
       className="focus-visible:ring-ring/50 inline-block rounded-lg outline-none focus-visible:ring-3"
     >
-      <img src="/support-me-on-kofi.png" alt="Support me on Ko-fi" className="h-9 w-auto" />
+      {/* A faint edge in dark mode, where the dark button would otherwise melt into the page. */}
+      <img
+        src="/support-me-on-kofi.png"
+        alt="Support me on Ko-fi"
+        className="h-9 w-auto rounded-[0.5rem] dark:outline dark:outline-1 dark:outline-white/20"
+      />
     </a>
   );
 }
