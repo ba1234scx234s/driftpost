@@ -213,7 +213,7 @@ export default function App() {
   const sidebar = (
     <>
       {/* Same height and padding as the list header next to it, so their bottom lines meet. */}
-      <div className="flex min-h-12 shrink-0 items-center justify-between border-b px-3 py-2.5">
+      <div className="flex h-13 shrink-0 items-center justify-between border-b px-3">
           <h1 className="font-heading text-lg font-semibold tracking-tight">
             <a
               href="/"
@@ -321,7 +321,7 @@ export default function App() {
             readerOpen ? "hidden lg:flex lg:w-[24rem] lg:shrink-0 lg:border-r xl:w-[28rem]" : "flex-1",
           )}
         >
-        <header className="flex min-h-12 items-center gap-3 border-b px-4 py-2.5 sm:px-6">
+        <header className="flex h-13 shrink-0 items-center gap-3 border-b px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-1">
             {isMobile && (
               <Button variant="ghost" size="icon-sm" className="-ml-2" onClick={() => setMenuOpen(true)} aria-label="Open menu">

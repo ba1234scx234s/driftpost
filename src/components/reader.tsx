@@ -40,7 +40,7 @@ export function Reader({ item, onClose, onPrev, onNext, end }: Props) {
 
   return (
     <section className="bg-background flex min-h-0 min-w-0 flex-1 flex-col" aria-label="Article">
-      <header className="flex min-h-12 items-center gap-1 border-b px-2 py-2 sm:px-4">
+      <header className="flex h-13 shrink-0 items-center gap-1 border-b px-2 sm:px-4">
         <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Back to list" className="lg:hidden">
           <ArrowLeftIcon />
         </Button>

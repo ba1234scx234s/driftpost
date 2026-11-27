@@ -2,6 +2,17 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.3.3 (27 November 2026)
+
+### New
+- Discover has 13 more design feeds, including Dezeen, designboom, Nielsen Norman Group, Codrops, Core77 and Typewolf.
+
+### Changed
+- Discover no longer has a YouTube section.
+
+### Fixed
+- The top bars of the sidebar, the list and the article line up again at every text size.
+
 ## 1.3.2 (27 November 2026)
 
 ### Changed

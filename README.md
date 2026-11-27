@@ -24,7 +24,7 @@ New visitors get a short welcome that explains how Driftpost works and points th
 
 ### Discover
 
-A hand-picked catalogue of popular feeds in 14 categories, from news and tech to science, design, comics and YouTube channels. Following takes one click, and feeds you already follow are marked.
+A hand-picked catalogue of popular feeds in 13 categories, from news and tech to science, design and comics. Following takes one click, and feeds you already follow are marked.
 
 ![The Discover page with category chips and feed cards with Follow buttons](docs/screenshots/discover.png)
 
