@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.4.1 (27 November 2026)
+
+### New
+- Configure → Reading has "Hide sidebar while reading". It starts on for tablets and off for wider screens; turn it on to give the list and the article the whole screen on any device.
+
 ## 1.4.0 (27 November 2026)
 
 ### New

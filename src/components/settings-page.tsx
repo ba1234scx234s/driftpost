@@ -16,6 +16,7 @@ import { BackupSection } from "@/components/backup-section";
 import { OpmlSection } from "@/components/opml-section";
 import { FontPicker } from "@/components/font-picker";
 import { ListItemPreview } from "@/components/item-list";
+import { useIsMobile, useIsTablet } from "@/hooks/use-is-mobile";
 import {
   normaliseKeyword,
   OPEN_IN,
@@ -53,6 +54,8 @@ let lastJump = 0;
  */
 export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n: number } }) {
   const settings = useSettings();
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
   const content: Record<SettingsSectionId, ReactNode> = {
     "appearance": (
@@ -165,6 +168,19 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
             onCheckedChange={(inApp) => void updateSettings({ openIn: inApp ? "reader" : "tab" })}
           />
         </Row>
+        {!isMobile && (
+          <Row
+            label="Hide sidebar while reading"
+            htmlFor="hide-sidebar"
+            hint="With an article open, the list and the article get the whole screen. Your feeds are in the menu."
+          >
+            <Switch
+              id="hide-sidebar"
+              checked={settings.hideSidebarWhenReading ?? isTablet}
+              onCheckedChange={(hideSidebarWhenReading) => void updateSettings({ hideSidebarWhenReading })}
+            />
+          </Row>
+        )}
         <LineHeightPicker lineHeight={settings.lineHeight} custom={settings.customLineHeight} />
       </Section>
     ),

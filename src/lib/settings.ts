@@ -62,6 +62,11 @@ export interface Settings {
   colorDots: boolean;
   /** How an article opens: in Driftpost's reader column, or the website in a new browser tab. */
   openIn: OpenIn;
+  /**
+   * Move the sidebar into the menu while an article is open, so the list and the article
+   * share the screen. Not set means automatic: on for tablets, off for wider screens.
+   */
+  hideSidebarWhenReading?: boolean;
   /** Every 30 days, ask to download a backup. */
   backupReminder: boolean;
   /** When a backup was last downloaded (ms since 1970). */

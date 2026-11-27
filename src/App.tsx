@@ -81,9 +81,9 @@ export default function App() {
 
   const openIn = settings.openIn;
   const readerOpen = !!selected && openIn !== "tab" && isList;
-  // The sidebar is a slide-in menu on phones, and on tablets while an article is open, so the
-  // list and the article share the screen.
-  const menuMode = isMobile || (isTablet && readerOpen);
+  // The sidebar is a slide-in menu on phones. While an article is open it moves there too, so
+  // the list and the article share the screen: on tablets unless turned off, anywhere if on.
+  const menuMode = isMobile || (readerOpen && (settings.hideSidebarWhenReading ?? isTablet));
 
   const markRead = useCallback((item: Item) => {
     // Keep every opened post in this list until you leave it (see useVisibleItems).
