@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SunIcon, XIcon } from "lucide-react";
+import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, ListIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { KOFI_URL } from "@/lib/kofi";
@@ -15,6 +15,7 @@ import { TOPIC_IDS, TOPICS, type TopicId } from "@/lib/topics";
 import { BackupSection } from "@/components/backup-section";
 import { OpmlSection } from "@/components/opml-section";
 import { FontPicker } from "@/components/font-picker";
+import { ListItemPreview } from "@/components/item-list";
 import {
   normaliseKeyword,
   OPEN_IN,
@@ -24,16 +25,17 @@ import {
   type Thumbnails,
   LINE_HEIGHTS,
   CUSTOM_LINE_HEIGHT,
+  CUSTOM_SIZE,
   type LineHeightId,
   updateSettings,
   useSettings,
-  type OpenIn,
   type SizeId,
 } from "@/lib/settings";
 
 /** The parts of Settings, in the order the side nav lists them. */
 export const SETTINGS_SECTIONS = [
   { id: "appearance", label: "Appearance", icon: PaletteIcon },
+  { id: "article-list", label: "Article list", icon: ListIcon },
   { id: "reading", label: "Reading", icon: BookOpenIcon },
   { id: "filters", label: "Filters", icon: FilterIcon },
   { id: "import-export", label: "Import and export", icon: ArrowDownUpIcon },
@@ -56,45 +58,14 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
   const content: Record<SettingsSectionId, ReactNode> = {
     "appearance": (
       <Section title="Appearance">
-        <Row label="Theme" htmlFor="theme">
+        <Row label="Theme" htmlFor="theme" wide>
           <ThemePicker />
         </Row>
         <FontPicker font={settings.font} />
-        <Row label="Text size" htmlFor="size">
-          <ToggleGroup
-            id="size"
-            type="single"
-            variant="outline"
-            value={settings.size}
-            onValueChange={(size) => size && void updateSettings({ size: size as SizeId })}
-          >
-            {Object.entries(SIZES).map(([id, s]) => (
-              <ToggleGroupItem key={id} value={id} aria-label={s.name} className="px-3">
-                {s.label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </Row>
-        <LineHeightPicker lineHeight={settings.lineHeight} custom={settings.customLineHeight} />
       </Section>
     ),
-    "reading": (
-      <Section title="Reading">
-        <Row label="Open articles" htmlFor="open-in" hint={OPEN_IN[settings.openIn].hint}>
-          <ToggleGroup
-            id="open-in"
-            type="single"
-            variant="outline"
-            value={settings.openIn}
-            onValueChange={(openIn) => openIn && void updateSettings({ openIn: openIn as OpenIn })}
-          >
-            {Object.entries(OPEN_IN).map(([id, o]) => (
-              <ToggleGroupItem key={id} value={id} className="px-3">
-                {o.label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </Row>
+    "article-list": (
+      <Section title="Article list">
         <Row
           label="Hide read posts"
           htmlFor="hide-read"
@@ -128,7 +99,25 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
             onCheckedChange={(markReadOnScroll) => void updateSettings({ markReadOnScroll })}
           />
         </Row>
-        <Row label="Thumbnails" htmlFor="thumbnails" hint={THUMBNAILS[settings.thumbnails].hint}>
+        <Row
+          label="Colour unread dots"
+          htmlFor="color-dots"
+          hint="The dot next to unread posts takes the main colour of the feed's icon."
+        >
+          <Switch
+            id="color-dots"
+            checked={settings.colorDots}
+            onCheckedChange={(colorDots) => void updateSettings({ colorDots })}
+          />
+        </Row>
+        <Row label="Show descriptions" htmlFor="summaries" hint="The short text under each title in your lists.">
+          <Switch
+            id="summaries"
+            checked={settings.showSummaries}
+            onCheckedChange={(showSummaries) => void updateSettings({ showSummaries })}
+          />
+        </Row>
+        <Row label="Thumbnails" htmlFor="thumbnails" hint={THUMBNAILS[settings.thumbnails].hint} wide>
           <ToggleGroup
             id="thumbnails"
             type="single"
@@ -143,24 +132,27 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
             ))}
           </ToggleGroup>
         </Row>
-        <Row label="Show descriptions" htmlFor="summaries" hint="The short text under each title in your lists.">
-          <Switch
-            id="summaries"
-            checked={settings.showSummaries}
-            onCheckedChange={(showSummaries) => void updateSettings({ showSummaries })}
-          />
-        </Row>
+        <div className="flex flex-col gap-2">
+          <p className="text-muted-foreground text-xs">Preview</p>
+          <ListItemPreview />
+        </div>
+      </Section>
+    ),
+    "reading": (
+      <Section title="Reading">
         <Row
-          label="Colour unread dots"
-          htmlFor="color-dots"
-          hint="The dot next to unread posts takes the main colour of the feed's icon."
+          label="Open articles in app"
+          htmlFor="open-in"
+          hint={settings.openIn === "reader" ? OPEN_IN.reader.hint : OPEN_IN.tab.hint}
         >
           <Switch
-            id="color-dots"
-            checked={settings.colorDots}
-            onCheckedChange={(colorDots) => void updateSettings({ colorDots })}
+            id="open-in"
+            checked={settings.openIn === "reader"}
+            onCheckedChange={(inApp) => void updateSettings({ openIn: inApp ? "reader" : "tab" })}
           />
         </Row>
+        <TextSizePicker size={settings.size} custom={settings.customSize} />
+        <LineHeightPicker lineHeight={settings.lineHeight} custom={settings.customLineHeight} />
       </Section>
     ),
     "filters": (
@@ -636,46 +628,92 @@ function Section({
 }
 
 /** Line height of an article's body text: three presets, or any value. */
+function TextSizePicker({ size, custom }: { size: SizeId; custom: number }) {
+  return (
+    <PresetOrCustom
+      id="size"
+      label="Text size"
+      hint="For all text in Driftpost. Custom sizes are in pixels."
+      options={Object.entries(SIZES).map(([id, s]) => ({ id, label: s.label, name: s.name }))}
+      value={size}
+      onChoose={(value) => void updateSettings({ size: value as SizeId })}
+      custom={custom}
+      onCustom={(customSize) => void updateSettings({ customSize })}
+      range={CUSTOM_SIZE}
+      customName="Custom text size in pixels"
+    />
+  );
+}
+
 function LineHeightPicker({ lineHeight, custom }: { lineHeight: LineHeightId; custom: number }) {
+  return (
+    <PresetOrCustom
+      id="line-height"
+      label="Line height"
+      hint="Space between lines in an article's text."
+      options={Object.entries(LINE_HEIGHTS).map(([id, l]) => ({ id, label: l.label }))}
+      value={lineHeight}
+      onChoose={(value) => void updateSettings({ lineHeight: value as LineHeightId })}
+      custom={custom}
+      onCustom={(customLineHeight) => void updateSettings({ customLineHeight })}
+      range={CUSTOM_LINE_HEIGHT}
+      customName="Custom line height"
+    />
+  );
+}
+
+/** A row of preset choices plus "Custom", which shows a number field for the reader's own value. */
+function PresetOrCustom(props: {
+  id: string;
+  label: string;
+  hint: string;
+  options: { id: string; label: string; name?: string }[];
+  value: string;
+  onChoose: (value: string) => void;
+  custom: number;
+  onCustom: (value: number) => void;
+  range: { min: number; max: number; step: number };
+  customName: string;
+}) {
+  const { custom, range } = props;
   const [draft, setDraft] = useState(String(custom));
   useEffect(() => setDraft(String(custom)), [custom]);
-  const { min, max, step } = CUSTOM_LINE_HEIGHT;
 
   const commit = () => {
     const n = Number(draft.replace(",", "."));
     if (!draft.trim() || !Number.isFinite(n)) return setDraft(String(custom));
-    const value = Math.round(Math.min(max, Math.max(min, n)) * 100) / 100;
+    const value = Math.round(Math.min(range.max, Math.max(range.min, n)) * 100) / 100;
     setDraft(String(value));
-    if (value !== custom) void updateSettings({ customLineHeight: value });
+    if (value !== custom) props.onCustom(value);
   };
 
   return (
-    <Row label="Line height" htmlFor="line-height" hint="Space between lines in an article's text.">
+    <Row label={props.label} htmlFor={props.id} hint={props.hint} wide>
       <div className="flex flex-wrap items-center gap-2">
         <ToggleGroup
-          id="line-height"
+          id={props.id}
           type="single"
           variant="outline"
-          value={lineHeight}
-          onValueChange={(value) => value && void updateSettings({ lineHeight: value as LineHeightId })}
+          value={props.value}
+          onValueChange={(value) => value && props.onChoose(value)}
         >
-          {Object.entries(LINE_HEIGHTS).map(([id, l]) => (
-            <ToggleGroupItem key={id} value={id} className="px-3">
-              {l.label}
+          {props.options.map((o) => (
+            <ToggleGroupItem key={o.id} value={o.id} aria-label={o.name} className="px-3">
+              {o.label}
             </ToggleGroupItem>
           ))}
           <ToggleGroupItem value="custom" className="px-3">
             Custom
           </ToggleGroupItem>
         </ToggleGroup>
-        {lineHeight === "custom" && (
+        {props.value === "custom" && (
           <Input
             type="number"
             inputMode="decimal"
-            aria-label="Custom line height"
-            min={min}
-            max={max}
-            step={step}
+            aria-label={props.customName}
+            min={range.min}
+            max={range.max}
+            step={range.step}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commit}
@@ -688,14 +726,31 @@ function LineHeightPicker({ lineHeight, custom }: { lineHeight: LineHeightId; cu
   );
 }
 
-export function Row({ label, htmlFor, hint, children }: { label: string; htmlFor: string; hint?: string; children: ReactNode }) {
+/**
+ * A setting: its name and hint on the left, the control on the right. The hint wraps
+ * rather than pushing the control onto a line of its own. Wide controls (button rows,
+ * menus) go under the text on phones, where there isn't room beside it.
+ */
+export function Row({
+  label,
+  htmlFor,
+  hint,
+  wide,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  hint?: string;
+  wide?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-      <div className="flex flex-col gap-0.5">
+    <div className={cn("flex items-center justify-between gap-x-6 gap-y-2", wide && "max-sm:flex-col max-sm:items-start")}>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <Label htmlFor={htmlFor}>{label}</Label>
         {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
       </div>
-      {children}
+      <div className="shrink-0">{children}</div>
     </div>
   );
 }

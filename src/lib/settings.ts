@@ -13,7 +13,15 @@ export const SIZES = {
   l: { label: "L", name: "Large", px: 18 },
   xl: { label: "XL", name: "Extra large", px: 20 },
 } as const;
-export type SizeId = keyof typeof SIZES;
+export type SizeId = keyof typeof SIZES | "custom";
+/** The range for a text size the reader types in, in pixels. */
+export const CUSTOM_SIZE = { min: 12, max: 28, step: 1 } as const;
+
+/** The text size to use, in pixels. */
+export function sizeOf(settings: Pick<Settings, "size" | "customSize">): number {
+  if (settings.size === "custom") return settings.customSize;
+  return (SIZES[settings.size] ?? SIZES.m).px;
+}
 
 /** Space between lines in an article's body text (not titles or headings). */
 export const LINE_HEIGHTS = {
@@ -33,6 +41,8 @@ export function lineHeightOf(settings: Pick<Settings, "lineHeight" | "customLine
 export interface Settings {
   font: FontId;
   size: SizeId;
+  /** Used when size is "custom", in pixels. */
+  customSize: number;
   /** Line height of an article's body text. */
   lineHeight: LineHeightId;
   /** Used when lineHeight is "custom". */
@@ -81,6 +91,7 @@ export type OpenIn = keyof typeof OPEN_IN;
 export const DEFAULT_SETTINGS: Settings = {
   font: "geist",
   size: "m",
+  customSize: 16,
   lineHeight: "default",
   customLineHeight: 1.75,
   keywords: [],
@@ -111,6 +122,7 @@ function load(
   if (saved.showThumbnails === false && !saved.thumbnails) saved.thumbnails = "none";
   delete saved.showThumbnails;
   if (!(String(saved.thumbnails) in THUMBNAILS)) delete saved.thumbnails;
+  if (saved.size !== undefined && saved.size !== "custom" && !(saved.size in SIZES)) delete saved.size;
   if ((saved.v ?? 1) < 2) delete saved.hideRead;
   delete saved.v;
   return { ...DEFAULT_SETTINGS, ...saved };

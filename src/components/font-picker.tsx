@@ -52,6 +52,7 @@ export function FontPicker({ font }: { font: string }) {
       <Row
         label="Font"
         htmlFor="font"
+        wide
         hint={
           current || choosing
             ? "Google Fonts are loaded from Google, which then sees your IP address. Built-in fonts don't contact anyone."

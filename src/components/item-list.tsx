@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useTheme } from "next-themes";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -89,6 +89,70 @@ export function ItemList({ view, items, selectedId, onSelect, compact, onScrolle
   );
 }
 
+// A made-up post for the preview in Settings. The feed has no address, so nothing is fetched:
+// its icon is the Driftpost logo and its colour is set here.
+const SAMPLE_FEED: Feed = { id: -1, url: "", title: "Driftpost", addedAt: 0 };
+
+/** The Driftpost logo in the text colour; the same shapes as public/favicon.svg. */
+function DriftpostLogo({ className }: { className?: string }) {
+  return (
+    <svg viewBox="343 111 800 800" fill="currentColor" aria-hidden className={className}>
+      <mask id="dp-logo-cut" maskUnits="userSpaceOnUse" x="343" y="111" width="800" height="800">
+        <rect x="343" y="111" width="800" height="800" fill="#fff" />
+        <path d="M369 389 C410 364 440 358 485 358 C580 358 630 409 705 409 C760 409 800 394 836 375 L836 684 C800 703 760 718 705 718 C630 718 580 667 485 667 C440 667 410 673 369 698 Z" fill="#000" />
+      </mask>
+      <path d="M469 186H792A325.5 325.5 0 0 1 792 837H469Z" mask="url(#dp-logo-cut)" />
+      <path d="M369 444 C410 419 440 413 485 413 C580 413 630 464 705 464 C760 464 800 449 836 430 L836 478 C800 497 760 512 705 512 C630 512 580 461 485 461 C440 461 410 467 369 492 Z M369 547 C410 522 440 516 485 516 C580 516 630 567 705 567 C760 567 800 552 836 533 L836 581 C800 600 760 615 705 615 C630 615 580 564 485 564 C440 564 410 570 369 595 Z M369 650 C410 625 440 619 485 619 C580 619 630 670 705 670 C760 670 800 655 836 636 L836 684 C800 703 760 718 705 718 C630 718 580 667 485 667 C440 667 410 673 369 698 Z" />
+    </svg>
+  );
+}
+const SAMPLE_COLOR = { h: 172, s: 70 };
+// The post's picture: a sunset beach photo with the Driftpost logo in the middle.
+const SAMPLE_IMAGE = "/preview-sample.jpg";
+const SAMPLE_ITEM: Item = {
+  id: -1,
+  feedId: -1,
+  guid: "sample",
+  title: "What the tide left behind",
+  summary: "No rush and nothing to keep up with. Make a coffee, find a calm spot and read at the pace of the waves.",
+  image: SAMPLE_IMAGE,
+  published: 0,
+  read: 0,
+  starred: 0,
+  addedAt: 0,
+};
+
+/** One list row drawn with the current Reading settings, for Settings. */
+export function ListItemPreview() {
+  const { thumbnails, showSummaries, colorDots } = useSettings();
+  const { resolvedTheme } = useTheme();
+  const color = dotColor(SAMPLE_COLOR, resolvedTheme === "dark");
+  // "2 hours ago", whenever Settings is opened.
+  const item = useMemo(() => ({ ...SAMPLE_ITEM, published: Date.now() - 2 * 60 * 60 * 1000 }), []);
+  return (
+    // A picture of a row, not a working one.
+    <div inert aria-label="Preview of a post in your lists" className="bg-background rounded-lg border px-3">
+      <ol>
+        <ItemRow
+          item={item}
+          feed={SAMPLE_FEED}
+          dotColor={colorDots ? color : undefined}
+          tileColor={color}
+          tileIcon={<DriftpostLogo className="size-7 sm:size-8" />}
+          showFeed
+          showThumbnail={thumbnails !== "none"}
+          showImage={thumbnails === "image"}
+          reserveThumbnail
+          showSummary={showSummaries}
+          selected={false}
+          compact={false}
+          onSelect={() => {}}
+        />
+      </ol>
+    </div>
+  );
+}
+
 function ItemRow(props: {
   item: Item;
   feed?: Feed;
@@ -100,6 +164,8 @@ function ItemRow(props: {
   reserveThumbnail: boolean;
   /** The feed's colour, for the placeholder tile. */
   tileColor?: string;
+  /** Drawn on the placeholder tile instead of the feed's icon. */
+  tileIcon?: ReactNode;
   showSummary: boolean;
   selected: boolean;
   compact: boolean;
@@ -174,7 +240,7 @@ function ItemRow(props: {
                 onError={() => setBroken(true)}
               />
             ) : (
-              feed && <FeedTile feed={feed} color={props.tileColor} compact={compact} />
+              feed && <FeedTile feed={feed} color={props.tileColor} icon={props.tileIcon} compact={compact} />
             )}
           </div>
         )}
@@ -188,7 +254,7 @@ function ItemRow(props: {
  * with its colour. Dark icons (dark shapes on see-through) need a light tile in dark mode:
  * a pale tint of their colour, or light grey when they have none.
  */
-function FeedTile({ feed, color, compact }: { feed: Feed; color?: string; compact: boolean }) {
+function FeedTile({ feed, color, icon, compact }: { feed: Feed; color?: string; icon?: ReactNode; compact: boolean }) {
   const light = iconNeedsTile(feed);
   const tint = color && `color-mix(in oklab, ${color} 22%, transparent)`;
   const style = {
@@ -197,7 +263,7 @@ function FeedTile({ feed, color, compact }: { feed: Feed; color?: string; compac
   } as CSSProperties;
   return (
     <div aria-hidden className="grid size-full place-items-center rounded-md bg-(--tile) dark:bg-(--tile-dark)" style={style}>
-      <FeedIcon feed={feed} bare className={cn(compact ? "size-5" : "size-6 sm:size-7", "text-xs")} />
+      {icon ?? <FeedIcon feed={feed} bare className={cn(compact ? "size-5" : "size-6 sm:size-7", "text-xs")} />}
     </div>
   );
 }

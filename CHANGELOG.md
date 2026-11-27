@@ -2,6 +2,16 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.3.0 (27 November 2026)
+
+### New
+- Settings has a new Article list section, with a preview of a post in your lists. The preview changes as you switch thumbnails, descriptions and coloured unread dots.
+- Text size has a Custom option, so you can type in your own size.
+
+### Changed
+- Settings is regrouped: Appearance has the theme and font, Article list has everything about your lists, and Reading has how articles open, text size and line height.
+- "Open articles" is now one switch, "Open articles in app" (on by default). Turn it off to open the article's website in a new tab.
+
 ## 1.2.1 (27 November 2026)
 
 ### Changed
