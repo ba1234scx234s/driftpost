@@ -74,6 +74,8 @@ export interface Settings {
    * share the screen. Not set means automatic: on for tablets, off for wider screens.
    */
   hideSidebarWhenReading?: boolean;
+  /** Show the pictures in articles. They load from the sites that publish them. */
+  loadImages: boolean;
   /** Every 30 days, ask to download a backup. */
   backupReminder: boolean;
   /** When a backup was last downloaded (ms since 1970). */
@@ -110,6 +112,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showSummaries: true,
   colorDots: true,
   openIn: "reader",
+  loadImages: true,
   backupReminder: true,
 };
 

@@ -2,6 +2,15 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.6.0 (27 November 2026)
+
+### New
+- Configure → Reading has a Load pictures switch, on by default. Pictures in articles load from the sites that publish them, so those sites see your IP address. Turn it off to read articles without them.
+- Configure → Reading shows a preview of article text below Line height.
+
+### Changed
+- The previews in Configure sit on a light tint, and Article list has a new icon.
+
 ## 1.5.0 (27 November 2026)
 
 ### New

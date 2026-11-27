@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { loadFullArticle, sanitiseArticle, shouldLoadFullText } from "@/lib/article";
 import { db, type Feed, type Item } from "@/lib/db";
+import { useSettings } from "@/lib/settings";
 import { useSwipe } from "@/hooks/use-swipe";
 
 interface Props {
@@ -103,10 +104,11 @@ function ArticleView({ item, live, feed }: { item: Item; live: Item; feed: Feed 
     // Only when a different article opens, not on every live update of this one.
   }, [item.id, feed?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const { loadImages } = useSettings();
   const html = useMemo(() => {
     const source = live.fullContent ?? live.content ?? (live.summary ? `<p>${escapeHtml(live.summary)}</p>` : "");
-    return sanitiseArticle(source, live.link);
-  }, [live.fullContent, live.content, live.summary, live.link]);
+    return sanitiseArticle(source, live.link, loadImages);
+  }, [live.fullContent, live.content, live.summary, live.link, loadImages]);
 
   const date = new Date(live.published);
   const articleRef = useRef<HTMLElement>(null);

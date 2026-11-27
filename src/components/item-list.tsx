@@ -132,7 +132,7 @@ export function ListItemPreview() {
   const item = useMemo(() => ({ ...SAMPLE_ITEM, published: Date.now() - 2 * 60 * 60 * 1000 }), []);
   return (
     // A picture of a row, not a working one.
-    <div inert aria-label="Preview of a post in your lists" className="bg-background rounded-lg border px-3">
+    <div inert aria-label="Preview of a post in your lists" className="bg-muted/50 rounded-lg border px-3">
       <ol>
         <ItemRow
           item={item}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, ListIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SunIcon, XIcon } from "lucide-react";
+import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, Rows3Icon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { KOFI_URL } from "@/lib/kofi";
@@ -35,7 +35,7 @@ import {
 /** The parts of Configure, in the order the side nav lists them. */
 export const SETTINGS_SECTIONS = [
   { id: "appearance", label: "Appearance", icon: PaletteIcon },
-  { id: "article-list", label: "Article list", icon: ListIcon },
+  { id: "article-list", label: "Article list", icon: Rows3Icon },
   { id: "reading", label: "Reading", icon: BookOpenIcon },
   { id: "filters", label: "Filters", icon: FilterIcon },
   { id: "import-export", label: "Import and export", icon: ArrowDownUpIcon },
@@ -181,7 +181,29 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
             />
           </Row>
         )}
+        <Row
+          label="Load pictures"
+          htmlFor="load-images"
+          hint="Pictures in articles load from the sites that publish them, so those sites see your IP address."
+        >
+          <Switch
+            id="load-images"
+            checked={settings.loadImages}
+            onCheckedChange={(loadImages) => void updateSettings({ loadImages })}
+          />
+        </Row>
         <LineHeightPicker lineHeight={settings.lineHeight} custom={settings.customLineHeight} />
+        <div className="flex flex-col gap-2">
+          <p className="text-muted-foreground text-xs">Preview</p>
+          {/* Set like an article's body text, so the line height shows as it will when reading. */}
+          <div inert aria-label="Preview of an article's text" className="bg-muted/50 rounded-lg border px-4 py-3">
+            <p className="prose prose-neutral dark:prose-invert max-w-none leading-(--article-leading)">
+              The tide goes out slowly in the late afternoon, leaving the sand smooth and dark. Gulls walk the water's
+              edge in no particular hurry, and the light turns from white to gold. There's nothing to catch up on here,
+              only the next wave, and the one after that.
+            </p>
+          </div>
+        </div>
       </Section>
     ),
     "filters": (
@@ -626,8 +648,8 @@ function PrivacyNote() {
       </p>
       <p>
         Post thumbnails and the pictures in articles load straight from the sites that publish them, so those sites
-        see your IP address, just as when you visit them. To keep the list from loading them, set Thumbnails to
-        Feed icon or None under Reading.
+        see your IP address, just as when you visit them. To stop that, turn off Load pictures under Reading and set
+        Thumbnails to Feed icon or None under Article list.
       </p>
       <p>Articles belong to the sites that publish them. Driftpost shows them for personal reading only.</p>
     </div>

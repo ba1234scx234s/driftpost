@@ -76,14 +76,17 @@ export async function loadFullArticle(item: Item): Promise<string | null> {
 }
 
 const FORBID_TAGS = ["style", "script", "iframe", "object", "embed", "form", "input", "button", "textarea", "select"];
+/** Everything that loads a file from the site, left out when pictures are turned off. */
+const MEDIA_TAGS = ["img", "picture", "source", "video", "audio", "track"];
 const FORBID_ATTR = ["style", "class", "id", "srcset", "sizes", "width", "height"];
 
 /**
  * Cleans article HTML for display: removes scripts, embeds, forms and inline styles,
  * makes links and images absolute, opens links in a new tab, and loads images lazily
- * without telling the site where you're reading.
+ * without telling the site where you're reading. With images off, pictures, video and audio
+ * are left out, so nothing is loaded from the site.
  */
-export function sanitiseArticle(html: string, baseUrl?: string): string {
+export function sanitiseArticle(html: string, baseUrl?: string, images = true): string {
   const absolute = (value: string | null) => {
     if (!value) return null;
     try {
@@ -115,7 +118,8 @@ export function sanitiseArticle(html: string, baseUrl?: string): string {
     }
   });
   try {
-    return DOMPurify.sanitize(html, { FORBID_TAGS, FORBID_ATTR });
+    const forbid = images ? FORBID_TAGS : [...FORBID_TAGS, ...MEDIA_TAGS];
+    return DOMPurify.sanitize(html, { FORBID_TAGS: forbid, FORBID_ATTR });
   } finally {
     DOMPurify.removeHook("afterSanitizeAttributes");
   }
