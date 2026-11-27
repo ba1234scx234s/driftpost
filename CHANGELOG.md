@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.0.2 (27 November 2026)
+
+### Fixed
+- Adding Driftpost to your home screen now gives it a proper icon on iPhone, iPad and Android (the white logo on black), and it opens full screen like an app.
+
 ## 1.0.1 (27 November 2026)
 
 ### New
