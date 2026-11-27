@@ -15,6 +15,12 @@ export interface Feed {
   lastModified?: string;
   lastFetched?: number;
   lastError?: string;
+  /** When this feed is next due a refresh (see nextFetchFor in feeds.ts). */
+  nextFetch?: number;
+  /** The feed's own <ttl>, in minutes. */
+  ttlMinutes?: number;
+  /** Refreshes that failed in a row: each one waits longer before trying again. */
+  failures?: number;
   addedAt: number;
 }
 

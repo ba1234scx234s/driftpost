@@ -2,6 +2,13 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.1.0 (27 November 2026)
+
+### Changed
+- Each feed now refreshes on its own schedule, based on how often it posts: busy news feeds every 30 minutes, slower blogs up to every 4 hours, and feeds that have been quiet for a month twice a day. Feeds that ask for a longer wait (RSS `<ttl>`) get it. The refresh button still checks every feed straight away.
+- A security.txt at driftpost.app/.well-known/security.txt says where to report security problems.
+- A feed that fails to load waits longer before each new try (1, 2, 4, 8, 16 hours, then once a day) instead of every 30 minutes. Being offline doesn't count.
+
 ## 1.0.3 (27 November 2026)
 
 ### Fixed

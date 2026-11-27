@@ -7,9 +7,16 @@ import { buildOpml, OpmlError, parseOpml } from "./opml";
 import { parseFeed, type ParsedFeed } from "./parse";
 import type { FilterablePost } from "./settings";
 import { startOfToday, type View } from "./views";
-import { fetchViaProxy } from "./proxy";
+import { FetchError, fetchViaProxy } from "./proxy";
 
+/** The shortest wait between refreshes of a feed. */
 export const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+const HOUR = 60 * 60 * 1000;
+/** The longest wait for a feed that still posts, and for one that has gone quiet. */
+const MAX_INTERVAL_MS = 4 * HOUR;
+const QUIET_INTERVAL_MS = 12 * HOUR;
+/** The longest wait after repeated failures. */
+const MAX_BACKOFF_MS = 24 * HOUR;
 const CONCURRENCY = 4;
 
 /** Finds a followed feed by address, ignoring http/https, www, trailing slashes and tracking tags. */
@@ -64,13 +71,36 @@ export async function unsubscribe(feedId: number): Promise<void> {
   });
 }
 
+/** When a feed is next due a refresh. */
+export function dueAt(feed: Feed): number {
+  return feed.nextFetch ?? (feed.lastFetched ?? 0) + REFRESH_INTERVAL_MS;
+}
+
+/**
+ * How long to wait before fetching a feed again, from how often it posts: a quarter of
+ * the usual gap between its last ten posts, at least 30 minutes and at most 4 hours.
+ * Feeds quiet for a month wait 12 hours. A feed's own <ttl> is honoured when longer.
+ */
+async function intervalFor(feedId: number, ttlMinutes: number | undefined, now: number): Promise<number> {
+  const recent = await db.items.where("[feedId+published]").between([feedId, -Infinity], [feedId, Infinity]).reverse().limit(10).toArray();
+  let wait = REFRESH_INTERVAL_MS;
+  if (recent.length >= 2) {
+    const newest = recent[0].published;
+    const gap = (newest - recent[recent.length - 1].published) / (recent.length - 1);
+    wait = now - newest > 30 * 24 * HOUR ? QUIET_INTERVAL_MS : Math.min(MAX_INTERVAL_MS, Math.max(REFRESH_INTERVAL_MS, gap / 4));
+  }
+  if (ttlMinutes) wait = Math.max(wait, Math.min(ttlMinutes * 60 * 1000, MAX_BACKOFF_MS));
+  return wait;
+}
+
 /** Fetches one feed and stores new items. Returns how many were new. */
 export async function refreshFeed(feed: Feed): Promise<number> {
   const now = Date.now();
   try {
     const res = await fetchViaProxy(feed.url, { etag: feed.etag, lastModified: feed.lastModified });
     if (res.notModified) {
-      await db.feeds.update(feed.id, { lastFetched: now, lastError: undefined });
+      const wait = await intervalFor(feed.id, feed.ttlMinutes, now);
+      await db.feeds.update(feed.id, { lastFetched: now, lastError: undefined, failures: 0, nextFetch: now + wait });
       return 0;
     }
     const parsed = parseFeed(res.text, res.finalUrl);
@@ -78,6 +108,7 @@ export async function refreshFeed(feed: Feed): Promise<number> {
     const current = await db.feeds.get(feed.id);
     if (!current) return 0;
     const added = await storeItems(feed.id, parsed, now);
+    const wait = await intervalFor(feed.id, parsed.ttlMinutes, now);
     await db.feeds.update(feed.id, {
       // Keep the feed's own title fresh, unless you renamed it.
       title: current.renamed ? current.title : parsed.title || current.title,
@@ -86,12 +117,25 @@ export async function refreshFeed(feed: Feed): Promise<number> {
       lastModified: res.lastModified,
       lastFetched: now,
       lastError: undefined,
+      ttlMinutes: parsed.ttlMinutes,
+      failures: 0,
+      nextFetch: now + wait,
     });
     return added;
   } catch (err) {
+    const message = err instanceof Error ? err.message : "Refresh failed";
+    if (err instanceof FetchError && /offline/i.test(message)) {
+      // Our connection, not the feed's fault: try again at the usual time.
+      await db.feeds.update(feed.id, { nextFetch: now + REFRESH_INTERVAL_MS });
+      return 0;
+    }
+    // Wait longer after each failure in a row: 1, 2, 4, 8, 16 hours, then once a day.
+    const failures = (feed.failures ?? 0) + 1;
     await db.feeds.update(feed.id, {
       lastFetched: now,
-      lastError: err instanceof Error ? err.message : "Refresh failed",
+      lastError: message,
+      failures,
+      nextFetch: now + Math.min(MAX_BACKOFF_MS, HOUR * 2 ** (failures - 1)),
     });
     return 0;
   }
@@ -316,11 +360,15 @@ export async function runPool<T>(list: T[], task: (item: T) => Promise<void>): P
 
 let running: Promise<number> | null = null;
 
-/** Refreshes every feed, a few at a time. Overlapping calls share one run. */
-export function refreshAll(): Promise<number> {
+/**
+ * Refreshes the feeds that are due (or every feed with `all`, for the refresh button),
+ * a few at a time. Overlapping calls share one run.
+ */
+export function refreshAll({ all = false }: { all?: boolean } = {}): Promise<number> {
   running ??= (async () => {
     try {
-      const feeds = await db.feeds.toArray();
+      const now = Date.now();
+      const feeds = (await db.feeds.toArray()).filter((f) => all || dueAt(f) <= now);
       let total = 0;
       await runPool(feeds, async (feed) => {
         total += await refreshFeed(feed);

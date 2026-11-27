@@ -16,6 +16,8 @@ export interface ParsedItem {
 export interface ParsedFeed {
   title: string;
   siteUrl?: string;
+  /** RSS <ttl>: how many minutes the feed asks readers to wait between fetches. */
+  ttlMinutes?: number;
   items: ParsedItem[];
 }
 
@@ -65,9 +67,11 @@ function parseRss(root: Element, feedUrl: string): ParsedFeed {
   const itemEls = [...children(channel, "item"), ...children(root, "item")];
   const siteUrl = resolve(textOf(child(channel, "link")), feedUrl);
 
+  const ttl = Number(textOf(child(channel, "ttl")));
   return {
     title: textOf(child(channel, "title")) || hostOf(siteUrl ?? feedUrl),
     siteUrl,
+    ttlMinutes: ttl > 0 ? ttl : undefined,
     items: itemEls.map((el) => {
       const link = resolve(textOf(child(el, "link")), feedUrl);
       const guid = textOf(child(el, "guid"));

@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { db } from "@/lib/db";
-import { refreshAll, REFRESH_INTERVAL_MS } from "@/lib/feeds";
+import { dueAt, refreshAll } from "@/lib/feeds";
 
 /**
- * Refreshes all feeds every 30 minutes while the app is open,
- * and when the tab comes back into view after being away that long.
+ * While the tab is visible, checks every minute for feeds that are due a refresh (each
+ * feed has its own schedule, see refreshFeed) and fetches just those. Hidden tabs don't
+ * fetch; they catch up when they come back into view. The refresh button fetches all.
  */
 export function useAutoRefresh() {
   const [refreshing, setRefreshing] = useState(false);
 
-  const run = useCallback(async () => {
+  const run = useCallback(async (all = false) => {
     setRefreshing(true);
     try {
-      return await refreshAll();
+      return await refreshAll({ all });
     } finally {
       setRefreshing(false);
     }
@@ -21,9 +22,9 @@ export function useAutoRefresh() {
   useEffect(() => {
     const refreshIfStale = async () => {
       if (document.visibilityState !== "visible") return;
+      const now = Date.now();
       const feeds = await db.feeds.toArray();
-      const oldest = Math.min(...feeds.map((f) => f.lastFetched ?? 0));
-      if (feeds.length && Date.now() - oldest >= REFRESH_INTERVAL_MS) void run();
+      if (feeds.some((f) => dueAt(f) <= now)) void run();
     };
 
     void refreshIfStale();
@@ -35,5 +36,6 @@ export function useAutoRefresh() {
     };
   }, [run]);
 
-  return { refreshing, refreshNow: run };
+  const refreshNow = useCallback(() => run(true), [run]);
+  return { refreshing, refreshNow };
 }
