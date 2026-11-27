@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.4.4 (27 November 2026)
+
+### New
+- Selecting a word in an article to add it as a filter now works on phones and tablets too. Press and hold a word; the "Add filter" button appears under it.
+
 ## 1.4.3 (27 November 2026)
 
 ### Fixed
