@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.1.2 (27 November 2026)
+
+### Changed
+- The description for search engines and shared links now says Driftpost is open source and anonymous.
+
 ## 1.1.1 (27 November 2026)
 
 ### New
