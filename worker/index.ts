@@ -25,12 +25,32 @@ const USER_AGENT = "Driftpost/0.1 (feed reader; +https://github.com/ba1234scx234
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname === "/api/fetch") return proxy(request, url, env, ctx);
-    if (url.pathname === "/api/icon") return icon(request, url, env);
-    if (url.pathname.startsWith("/api/")) return text("Not found", 404);
-    return env.ASSETS.fetch(request);
+    if (url.pathname.startsWith("/api/")) {
+      const res =
+        url.pathname === "/api/fetch"
+          ? await proxy(request, url, env, ctx)
+          : url.pathname === "/api/icon"
+            ? await icon(request, url, env)
+            : text("Not found", 404);
+      return secure(res);
+    }
+    return env.ASSETS.fetch(request); // static files get their headers from public/_headers
   },
 } satisfies ExportedHandler<Env>;
+
+/**
+ * API responses carry other sites' content: never let a browser run or frame it, even if
+ * someone opens an /api address directly.
+ */
+function secure(res: Response): Response {
+  const out = new Response(res.body, res);
+  out.headers.set("Content-Security-Policy", "default-src 'none'; sandbox; frame-ancestors 'none'");
+  out.headers.set("X-Content-Type-Options", "nosniff");
+  out.headers.set("X-Frame-Options", "DENY");
+  out.headers.set("Referrer-Policy", "no-referrer");
+  out.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  return out;
+}
 
 /** True when this visitor has made too many requests to other sites in the last minute. */
 async function overLimit(limiter: Limiter | undefined, request: Request): Promise<boolean> {

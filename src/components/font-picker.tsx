@@ -35,10 +35,8 @@ export function FontPicker({ font }: { font: string }) {
   const isCustom = !!current && !(SUGGESTED_GOOGLE_FONTS as readonly string[]).includes(current);
   const [choosing, setChoosing] = useState(false);
 
-  // Preview the suggested Google fonts in the menu.
-  useEffect(() => {
-    SUGGESTED_GOOGLE_FONTS.forEach((f) => void loadGoogleFont(f));
-  }, []);
+  // Google fonts are only fetched once one is picked (not to preview them in the menu),
+  // so Google never hears from readers who stick with a built-in font.
 
   function choose(value: string) {
     if (value === CUSTOM) {
@@ -54,7 +52,11 @@ export function FontPicker({ font }: { font: string }) {
       <Row
         label="Font"
         htmlFor="font"
-        hint={current ? "Loaded from Google Fonts, so Google sees your IP address when it loads." : undefined}
+        hint={
+          current || choosing
+            ? "Google Fonts are loaded from Google, which then sees your IP address. Built-in fonts don't contact anyone."
+            : undefined
+        }
       >
         <Select value={choosing ? CUSTOM : font} onValueChange={choose}>
           <SelectTrigger id="font" className="w-56">
@@ -73,7 +75,7 @@ export function FontPicker({ font }: { font: string }) {
             <SelectGroup>
               <SelectLabel>Google Fonts</SelectLabel>
               {SUGGESTED_GOOGLE_FONTS.map((family) => (
-                <SelectItem key={family} value={googleFontId(family)} style={{ fontFamily: fontStack(googleFontId(family)) }}>
+                <SelectItem key={family} value={googleFontId(family)}>
                   {family}
                 </SelectItem>
               ))}

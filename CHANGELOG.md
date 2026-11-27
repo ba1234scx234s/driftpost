@@ -2,6 +2,15 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.1.3 (27 November 2026)
+
+### Changed
+- Security headers on every page: a content security policy that only lets Driftpost's own code run, no framing by other sites, HTTPS only, and a stricter referrer policy. Responses from Driftpost's fetch proxy can never run as a page.
+- Google Fonts are only loaded once you pick one: opening Settings no longer contacts Google to preview them. A note next to the font picker explains that Google sees your IP address when you use one.
+
+### Fixed
+- Updated dependencies with known security issues (none of them reached the app in your browser).
+
 ## 1.1.2 (27 November 2026)
 
 ### Changed
