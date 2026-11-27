@@ -2,6 +2,12 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.2.1 (27 November 2026)
+
+### Changed
+- Settings → About no longer links to the GitHub issues page; the email address is the way to get in touch.
+- The About text is simpler: the version number links to what's new and "open source" links to the code, replacing the two separate links.
+
 ## 1.2.0 (27 November 2026)
 
 ### New

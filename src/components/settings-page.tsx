@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, CodeIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, MessageSquareWarningIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SparklesIcon, SunIcon, XIcon } from "lucide-react";
+import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, HeartIcon, InfoIcon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { KOFI_URL } from "@/lib/kofi";
@@ -456,23 +456,20 @@ const REPO_URL = "https://github.com/ba1234scx234s/driftpost";
 
 function About() {
   const link = "text-foreground inline-flex items-center gap-1.5 underline underline-offset-4";
+  const inline = "text-foreground underline underline-offset-4";
   return (
     <div className="text-muted-foreground flex flex-col gap-3 text-sm">
-      <p>Driftpost {__APP_VERSION__}. Free and open source under the MIT licence.</p>
-      <div className="flex flex-wrap gap-x-6 gap-y-2">
-        <a href={`${REPO_URL}/releases`} target="_blank" rel="noreferrer" className={link}>
-          <SparklesIcon className="size-4" aria-hidden />
-          What's new
+      <p>
+        Driftpost{" "}
+        <a href={`${REPO_URL}/releases`} target="_blank" rel="noreferrer" className={inline} title="What's new">
+          {__APP_VERSION__}
         </a>
-        <a href={REPO_URL} target="_blank" rel="noreferrer" className={link}>
-          <CodeIcon className="size-4" aria-hidden />
-          Source code on GitHub
-        </a>
-        <a href={`${REPO_URL}/issues`} target="_blank" rel="noreferrer" className={link}>
-          <MessageSquareWarningIcon className="size-4" aria-hidden />
-          Report a problem or idea
-        </a>
-      </div>
+        . Free and{" "}
+        <a href={REPO_URL} target="_blank" rel="noreferrer" className={inline}>
+          open source
+        </a>{" "}
+        under the MIT licence.
+      </p>
       <p>
         For questions or feedback, please reach out to{" "}
         <a href="mailto:driftpost_app@pm.me" className="text-foreground underline underline-offset-4">
