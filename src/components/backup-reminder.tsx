@@ -13,7 +13,7 @@ const TOAST_ID = "backup-reminder";
 
 /**
  * Every 30 days, a gentle prompt to download a backup, since everything lives only in this
- * browser. Off in Settings → Backup. Renders nothing itself; the prompt is a toast.
+ * browser. Off in Configure → Backup. Renders nothing itself; the prompt is a toast.
  */
 export function BackupReminder() {
   useEffect(() => {

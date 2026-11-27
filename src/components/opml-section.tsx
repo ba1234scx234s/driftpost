@@ -6,7 +6,7 @@ import { exportOpml, importOpml } from "@/lib/feeds";
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 
-/** Settings → Import and export: move subscriptions to and from other feed readers. */
+/** Configure → Import and export: move subscriptions to and from other feed readers. */
 export function OpmlSection() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);

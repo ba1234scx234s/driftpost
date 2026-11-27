@@ -24,7 +24,7 @@ import {
 
 type Pending = { backup: ReturnType<typeof readBackup>; summary: BackupSummary };
 
-/** Settings → Backup: download everything as one file, or restore from one. */
+/** Configure → Backup: download everything as one file, or restore from one. */
 export function BackupSection() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);

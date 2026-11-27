@@ -85,7 +85,7 @@ function HideMenu(props: {
 async function hideTopic(topic: TopicId) {
   await setTopicHidden(topic, true);
   toast.success(`Hiding ${TOPICS[topic].label} posts`, {
-    description: "Change this any time in Settings → Filters.",
+    description: "Change this any time in Configure → Filters.",
     action: { label: "Undo", onClick: () => void setTopicHidden(topic, false) },
     duration: 8000,
   });
@@ -98,7 +98,7 @@ async function hideOneTag(tag: string) {
     return;
   }
   toast.success(`Hiding posts tagged “${tag}”`, {
-    description: "Change this any time in Settings → Filters.",
+    description: "Change this any time in Configure → Filters.",
     action: { label: "Undo", onClick: () => void unhideTag(tag) },
     duration: 8000,
   });

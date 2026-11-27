@@ -53,9 +53,9 @@ export default function App() {
     setMenuOpen(false);
   }, []);
   const addInput = useRef<HTMLInputElement>(null);
-  // A request to open Settings at one part; n changes so the same part can be asked for again.
+  // A request to open Configure at one part; n changes so the same part can be asked for again.
   const [settingsJump, setSettingsJump] = useState<{ section: SettingsSectionId; n: number }>();
-  // Opens Settings at Import and export.
+  // Opens Configure at Import and export.
   const showImportExport = useCallback(() => {
     setSettingsJump((prev) => ({ section: "import-export", n: (prev?.n ?? 0) + 1 }));
     setScreen("settings");
@@ -66,7 +66,7 @@ export default function App() {
   }, [addOpen]);
   const selectedFeed = typeof screen === "number" ? feeds?.find((f) => f.id === screen) : undefined;
   const lastFetched = feeds?.length ? Math.max(...feeds.map((f) => f.lastFetched ?? 0)) : undefined;
-  // The post list being shown, or null on the Settings and Discover pages.
+  // The post list being shown, or null on the Configure and Discover pages.
   const view: View | null = screen === "settings" || screen === "discover" ? null : screen;
   const isList = view !== null;
   const items = useVisibleItems(view ?? "all", keepIds);
@@ -182,7 +182,7 @@ export default function App() {
     if (family) void loadGoogleFont(family);
     root.style.fontSize = `${sizeOf(settings)}px`;
     root.style.setProperty("--article-leading", String(lineHeightOf(settings)));
-  }, [settings.font, settings.size, settings.customSize, settings.lineHeight, settings.customLineHeight]);
+  }, [settings.font, settings.size, settings.lineHeight, settings.customLineHeight]);
 
   const unreadHere =
     useLiveQuery(() => (view === null ? 0 : unreadInView(view, hidden).count()), [view, hidden]) ?? 0;
@@ -204,7 +204,7 @@ export default function App() {
 
   const title =
     screen === "settings"
-      ? "Settings"
+      ? "Configure"
       : screen === "discover"
         ? "Discover"
         : (selectedFeed?.title ?? (screen === "today" ? "Today" : "All posts"));
@@ -287,7 +287,7 @@ export default function App() {
           active={screen === "settings"}
           onClick={() => go("settings")}
           icon={<SettingsIcon className="size-4" />}
-          label="Settings"
+          label="Configure"
         />
       </div>
     </>
@@ -305,7 +305,7 @@ export default function App() {
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <SheetTitle className="sr-only">Menu</SheetTitle>
-            <SheetDescription className="sr-only">Your feeds, Discover and Settings</SheetDescription>
+            <SheetDescription className="sr-only">Your feeds, Discover and Configure</SheetDescription>
             {sidebar}
           </SheetContent>
         </Sheet>

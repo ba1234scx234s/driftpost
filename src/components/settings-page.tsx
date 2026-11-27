@@ -25,14 +25,13 @@ import {
   type Thumbnails,
   LINE_HEIGHTS,
   CUSTOM_LINE_HEIGHT,
-  CUSTOM_SIZE,
   type LineHeightId,
   updateSettings,
   useSettings,
   type SizeId,
 } from "@/lib/settings";
 
-/** The parts of Settings, in the order the side nav lists them. */
+/** The parts of Configure, in the order the side nav lists them. */
 export const SETTINGS_SECTIONS = [
   { id: "appearance", label: "Appearance", icon: PaletteIcon },
   { id: "article-list", label: "Article list", icon: ListIcon },
@@ -49,7 +48,7 @@ export type SettingsSectionId = (typeof SETTINGS_SECTIONS)[number]["id"];
 let lastJump = 0;
 
 /**
- * Settings as one long page. On wider screens a nav beside it jumps to each part and
+ * Configure as one long page. On wider screens a nav beside it jumps to each part and
  * highlights the one you're reading; phones just scroll.
  */
 export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n: number } }) {
@@ -62,6 +61,21 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
           <ThemePicker />
         </Row>
         <FontPicker font={settings.font} />
+        <Row label="Text size" htmlFor="size" hint="For all text in Driftpost." wide>
+          <ToggleGroup
+            id="size"
+            type="single"
+            variant="outline"
+            value={settings.size}
+            onValueChange={(size) => size && void updateSettings({ size: size as SizeId })}
+          >
+            {Object.entries(SIZES).map(([id, s]) => (
+              <ToggleGroupItem key={id} value={id} aria-label={s.name} className="px-3">
+                {s.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </Row>
       </Section>
     ),
     "article-list": (
@@ -151,7 +165,6 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
             onCheckedChange={(inApp) => void updateSettings({ openIn: inApp ? "reader" : "tab" })}
           />
         </Row>
-        <TextSizePicker size={settings.size} custom={settings.customSize} />
         <LineHeightPicker lineHeight={settings.lineHeight} custom={settings.customLineHeight} />
       </Section>
     ),
@@ -229,7 +242,7 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
   }
 
   // Opened from a link that points at a part (like "Import OPML"): go straight there.
-  // Each request is followed once, so opening Settings later starts at the top again.
+  // Each request is followed once, so opening Configure later starts at the top again.
   useEffect(() => {
     if (!jump || jump.n <= lastJump) return;
     lastJump = jump.n;
@@ -265,7 +278,7 @@ export function SettingsPage({ jump }: { jump?: { section: SettingsSectionId; n:
 
   return (
     <div className="flex min-h-0 flex-1">
-      <nav aria-label="Settings" className="hidden w-56 shrink-0 flex-col gap-1 border-r p-3 md:flex">
+      <nav aria-label="Configure" className="hidden w-56 shrink-0 flex-col gap-1 border-r p-3 md:flex">
         {SETTINGS_SECTIONS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -489,7 +502,7 @@ const FAQ: { q: string; a: ReactNode }[] = [
   },
   {
     q: "What happens if I clear my browsing data?",
-    a: "Your feeds, read status and settings are erased with it. Download a backup now and then (Settings → Backup) and restore it if that happens.",
+    a: "Your feeds, read status and settings are erased with it. Download a backup now and then (Configure → Backup) and restore it if that happens.",
   },
   {
     q: "Can my browser remove my feeds on its own?",
@@ -529,7 +542,7 @@ const FAQ: { q: string; a: ReactNode }[] = [
   },
   {
     q: "Can I bring my feeds from another reader?",
-    a: "Yes. Export an OPML file from Feedly, Inoreader, NetNewsWire or most other readers and import it under Settings → Import and export.",
+    a: "Yes. Export an OPML file from Feedly, Inoreader, NetNewsWire or most other readers and import it under Configure → Import and export.",
   },
   {
     q: "How often do feeds update?",
@@ -628,23 +641,6 @@ function Section({
 }
 
 /** Line height of an article's body text: three presets, or any value. */
-function TextSizePicker({ size, custom }: { size: SizeId; custom: number }) {
-  return (
-    <PresetOrCustom
-      id="size"
-      label="Text size"
-      hint="For all text in Driftpost. Custom sizes are in pixels."
-      options={Object.entries(SIZES).map(([id, s]) => ({ id, label: s.label, name: s.name }))}
-      value={size}
-      onChoose={(value) => void updateSettings({ size: value as SizeId })}
-      custom={custom}
-      onCustom={(customSize) => void updateSettings({ customSize })}
-      range={CUSTOM_SIZE}
-      customName="Custom text size in pixels"
-    />
-  );
-}
-
 function LineHeightPicker({ lineHeight, custom }: { lineHeight: LineHeightId; custom: number }) {
   return (
     <PresetOrCustom

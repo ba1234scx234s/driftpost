@@ -2,6 +2,12 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.3.2 (27 November 2026)
+
+### Changed
+- Settings is now called Configure.
+- Text size is back under Appearance, with just its four sizes. The custom size is gone; if you had set one, text goes back to the default size.
+
 ## 1.3.1 (27 November 2026)
 
 ### New

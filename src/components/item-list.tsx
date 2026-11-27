@@ -89,7 +89,7 @@ export function ItemList({ view, items, selectedId, onSelect, compact, onScrolle
   );
 }
 
-// A made-up post for the preview in Settings. The feed has no address, so nothing is fetched:
+// A made-up post for the preview in Configure. The feed has no address, so nothing is fetched:
 // its icon is the Driftpost logo and its colour is set here.
 const SAMPLE_FEED: Feed = { id: -1, url: "", title: "Driftpost", addedAt: 0 };
 
@@ -122,12 +122,12 @@ const SAMPLE_ITEM: Item = {
   addedAt: 0,
 };
 
-/** One list row drawn with the current Reading settings, for Settings. */
+/** One list row drawn with the current Reading settings, for Configure. */
 export function ListItemPreview() {
   const { thumbnails, showSummaries, colorDots } = useSettings();
   const { resolvedTheme } = useTheme();
   const color = dotColor(SAMPLE_COLOR, resolvedTheme === "dark");
-  // "2 hours ago", whenever Settings is opened.
+  // "2 hours ago", whenever Configure is opened.
   const item = useMemo(() => ({ ...SAMPLE_ITEM, published: Date.now() - 2 * 60 * 60 * 1000 }), []);
   return (
     // A picture of a row, not a working one.

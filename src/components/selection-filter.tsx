@@ -15,7 +15,7 @@ interface Popup {
 
 /**
  * Select a word (or a few) in the article and an "Add filter" button appears above it.
- * Clicking it adds the words to the keyword filters in Settings.
+ * Clicking it adds the words to the keyword filters in Configure.
  */
 export function SelectionFilter({ containerRef }: { containerRef: RefObject<HTMLElement | null> }) {
   const [popup, setPopup] = useState<Popup | null>(null);

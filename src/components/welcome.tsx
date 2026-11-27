@@ -94,13 +94,13 @@ export function Welcome({
             <button type="button" onClick={onSettings} className="text-foreground underline underline-offset-4">
               Import an OPML file or restore a Driftpost backup
             </button>{" "}
-            in Settings.
+            in Configure.
           </p>
         </div>
 
         <p className="text-muted-foreground border-t pt-4 text-xs">
           Because everything lives in this browser, clearing your browsing data erases it too. Download a backup in
-          Settings now and then to keep it safe.
+          Configure now and then to keep it safe.
         </p>
       </div>
     </ScrollArea>

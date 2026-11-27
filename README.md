@@ -40,7 +40,7 @@ A hand-picked catalogue of popular feeds in 14 categories, from news and tech to
 
 Hide posts by topic (Sport, Politics, Business…), by words in the title, or by a feed's own tags. Click a tag on any post to hide it, or select words in an article to turn them into a filter. Hidden posts don't count as unread.
 
-![Settings with the Sport topic hidden and two hidden title words](docs/screenshots/filters.png)
+![Configure with the Sport topic hidden and two hidden title words](docs/screenshots/filters.png)
 
 ### Keeps the noise down
 
@@ -51,7 +51,7 @@ Hide posts by topic (Sport, Politics, Business…), by words in the title, or by
 
 ### Yours to keep
 
-Because everything is in your browser, Settings → Backup downloads it all in one file: feeds, every post with its read status, settings and filters. Restore it in any browser. Every 30 days Driftpost reminds you to make a fresh one (you can turn that off). Subscriptions also import and export as OPML, in Settings → Import and export.
+Because everything is in your browser, Configure → Backup downloads it all in one file: feeds, every post with its read status, settings and filters. Restore it in any browser. Every 30 days Driftpost reminds you to make a fresh one (you can turn that off). Subscriptions also import and export as OPML, in Configure → Import and export.
 
 ## How it works
 
