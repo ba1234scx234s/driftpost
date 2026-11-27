@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.1.1 (27 November 2026)
+
+### New
+- A description and preview image for search engines and shared links (Google, Facebook, LinkedIn, Slack, iMessage…), plus robots.txt and a sitemap.
+
 ## 1.1.0 (27 November 2026)
 
 ### Changed
