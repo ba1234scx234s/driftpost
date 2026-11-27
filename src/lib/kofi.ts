@@ -1,7 +1,7 @@
 // The occasional Ko-fi prompt under "You're all caught up". It shows every 5th time that
 // message appears, and not at all for 180 days after someone follows the link.
 
-export const KOFI_URL = "https://ko-fi.com/driftpost";
+export const KOFI_URL = "https://ko-fi.com/W2X42BCT3X";
 
 const COUNT_KEY = "driftpost:caught-up-count";
 const SNOOZE_KEY = "driftpost:kofi-snoozed-until";

@@ -1,6 +1,4 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { CupSodaIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { countCaughtUp, KOFI_URL, snoozeKofi } from "@/lib/kofi";
 
@@ -26,24 +24,34 @@ export function KofiNote({ otherwise, className }: { otherwise?: ReactNode; clas
       )}
     >
       <p>
-        Enjoying Driftpost?
+        <span className="text-foreground">Enjoying Driftpost?</span>
         <br />
         It's free, with no ads or tracking. If you'd like to support it, you can buy me an iced coffee.
       </p>
-      <Button size="sm" asChild>
-        <a
-          href={KOFI_URL}
-          target="_blank"
-          rel="noreferrer"
-          onClick={() => {
-            snoozeKofi();
-            setAsk(false);
-          }}
-        >
-          <CupSodaIcon />
-          Buy me an iced coffee on Ko-fi
-        </a>
-      </Button>
+      <KofiButton
+        onClick={() => {
+          snoozeKofi();
+          setAsk(false);
+        }}
+      />
     </div>
+  );
+}
+
+/**
+ * Ko-fi's own "Support me on Ko-fi" button. The picture is a copy served by Driftpost, so
+ * Ko-fi hears nothing until someone follows the link.
+ */
+export function KofiButton({ onClick }: { onClick?: () => void }) {
+  return (
+    <a
+      href={KOFI_URL}
+      target="_blank"
+      rel="noreferrer"
+      onClick={onClick}
+      className="focus-visible:ring-ring/50 inline-block rounded-lg outline-none focus-visible:ring-3"
+    >
+      <img src="/support-me-on-kofi.png" alt="Support me on Ko-fi" className="h-9 w-auto" />
+    </a>
   );
 }

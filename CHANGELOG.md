@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.6.5 (27 November 2026)
+
+### Changed
+- Ko-fi's own "Support me on Ko-fi" button replaces the old one. Its picture is served by Driftpost, so Ko-fi isn't contacted unless you click it.
+
 ## 1.6.4 (27 November 2026)
 
 ### Changed

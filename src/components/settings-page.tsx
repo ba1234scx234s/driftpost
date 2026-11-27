@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTheme } from "next-themes";
-import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, CupSodaIcon, EyeIcon, EyeOffIcon, FilterIcon, InfoIcon, Rows3Icon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SunIcon, XIcon } from "lucide-react";
+import { ArchiveIcon, ArrowDownUpIcon, BookOpenIcon, ChevronDownIcon, CircleHelpIcon, EyeIcon, EyeOffIcon, FilterIcon, InfoIcon, Rows3Icon, MonitorIcon, MoonIcon, PaletteIcon, PlusIcon, ShieldIcon, SunIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { KOFI_URL } from "@/lib/kofi";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,6 +14,8 @@ import { TOPIC_IDS, TOPICS, type TopicId } from "@/lib/topics";
 import { BackupSection } from "@/components/backup-section";
 import { OpmlSection } from "@/components/opml-section";
 import { Acknowledgement } from "@/components/acknowledgement";
+import { KofiButton } from "@/components/kofi-note";
+import { KOFI_URL } from "@/lib/kofi";
 import { FontPicker } from "@/components/font-picker";
 import { ListItemPreview } from "@/components/item-list";
 import { useIsMobile, useIsTablet } from "@/hooks/use-is-mobile";
@@ -488,7 +489,6 @@ function KeywordFilters({ keywords }: { keywords: string[] }) {
 const REPO_URL = "https://github.com/ba1234scx234s/driftpost";
 
 function About() {
-  const link = "text-foreground inline-flex items-center gap-1.5 underline underline-offset-4";
   const inline = "text-foreground underline underline-offset-4";
   return (
     <div className="text-muted-foreground flex flex-col gap-3 text-sm">
@@ -507,10 +507,7 @@ function About() {
         on GitHub.
       </p>
       <div>
-        <a href={KOFI_URL} target="_blank" rel="noreferrer" className={link}>
-          <CupSodaIcon className="size-4" aria-hidden />
-          Buy me an iced coffee on Ko-fi
-        </a>
+        <KofiButton />
       </div>
       <Acknowledgement />
     </div>
