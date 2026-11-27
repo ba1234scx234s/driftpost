@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.4.2 (27 November 2026)
+
+### New
+- Text size has two larger sizes, XXL and XXXL, for tablets and big screens.
+
 ## 1.4.1 (27 November 2026)
 
 ### New

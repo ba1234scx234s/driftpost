@@ -12,6 +12,8 @@ export const SIZES = {
   m: { label: "M", name: "Default", px: 16 },
   l: { label: "L", name: "Large", px: 18 },
   xl: { label: "XL", name: "Extra large", px: 20 },
+  xxl: { label: "XXL", name: "Extra extra large", px: 22 },
+  xxxl: { label: "XXXL", name: "Largest", px: 24 },
 } as const;
 export type SizeId = keyof typeof SIZES;
 
