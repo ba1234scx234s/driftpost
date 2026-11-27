@@ -2,6 +2,11 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.0.3 (27 November 2026)
+
+### Fixed
+- The Android home-screen icon is no longer oversized: the logo now sits at the same size as on iPhone.
+
 ## 1.0.2 (27 November 2026)
 
 ### Fixed
