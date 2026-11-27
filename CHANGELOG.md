@@ -2,6 +2,14 @@
 
 What's new in each version of Driftpost. Each version is also a [release on GitHub](https://github.com/ba1234scx234s/driftpost/releases).
 
+## 1.3.1 (27 November 2026)
+
+### New
+- Discover has five feeds from Australia's ABC: Top Stories and World under News, plus Business, Sport and Culture.
+
+### Changed
+- Feeds in Discover are sorted A to Z within each category (a leading "The" doesn't count).
+
 ## 1.3.0 (27 November 2026)
 
 ### New

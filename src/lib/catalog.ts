@@ -16,7 +16,7 @@ export interface CatalogCategory {
   feeds: CatalogFeed[];
 }
 
-export const CATALOG: CatalogCategory[] = [
+const CATEGORIES: CatalogCategory[] = [
   {
     id: "news",
     label: "News",
@@ -24,7 +24,8 @@ export const CATALOG: CatalogCategory[] = [
       { title: "BBC News", url: "https://feeds.bbci.co.uk/news/rss.xml", site: "https://www.bbc.co.uk/news", about: "Top stories from the BBC" },
       { title: "BBC News – World", url: "https://feeds.bbci.co.uk/news/world/rss.xml", site: "https://www.bbc.co.uk/news", about: "World news from the BBC" },
       { title: "The Guardian – World", url: "https://www.theguardian.com/world/rss", site: "https://www.theguardian.com", about: "World news from The Guardian" },
-      { title: "Al Jazeera English", url: "https://www.aljazeera.com/xml/rss/all.xml", site: "https://www.aljazeera.com", about: "International news" },
+      { title: "ABC – Top Stories", url: "https://www.abc.net.au/news/feed/10719986/rss.xml", site: "https://www.abc.net.au/news", about: "Top stories from Australia's ABC" },
+      { title: "ABC – World", url: "https://www.abc.net.au/news/feed/104217382/rss.xml", site: "https://www.abc.net.au/news", about: "World news from the ABC" },
       { title: "NPR News", url: "https://feeds.npr.org/1001/rss.xml", site: "https://www.npr.org", about: "US public radio news" },
       { title: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", site: "https://www.nytimes.com", about: "Home page stories" },
       { title: "NYT – World", url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml", site: "https://www.nytimes.com", about: "World news from the Times" },
@@ -38,7 +39,6 @@ export const CATALOG: CatalogCategory[] = [
       { title: "Deutsche Welle", url: "https://rss.dw.com/rdf/rss-en-all", site: "https://www.dw.com", about: "Germany's international broadcaster" },
       { title: "Le Monde", url: "https://www.lemonde.fr/rss/une.xml", site: "https://www.lemonde.fr", about: "French news, in French" },
       { title: "Times of India", url: "https://timesofindia.indiatimes.com/rssfeedstopstories.cms", site: "https://timesofindia.indiatimes.com", about: "Top stories from India" },
-      { title: "South China Morning Post", url: "https://www.scmp.com/rss/91/feed/", site: "https://www.scmp.com", about: "News from Hong Kong and Asia" },
     ],
   },
   {
@@ -129,6 +129,7 @@ export const CATALOG: CatalogCategory[] = [
       { title: "Fast Company", url: "https://www.fastcompany.com/latest/rss?truncated=true", site: "https://www.fastcompany.com", about: "Business, design and innovation" },
       { title: "Fortune", url: "https://fortune.com/feed/", site: "https://fortune.com", about: "Business news" },
       { title: "Seth's Blog", url: "https://seths.blog/feed/", site: "https://seths.blog", about: "Short daily posts on marketing and work" },
+      { title: "ABC – Business", url: "https://www.abc.net.au/news/feed/104217374/rss.xml", site: "https://www.abc.net.au/news", about: "Business news from the ABC" },
     ],
   },
   {
@@ -140,6 +141,7 @@ export const CATALOG: CatalogCategory[] = [
       { title: "The Athletic", url: "https://www.nytimes.com/athletic/rss/news/", site: "https://www.nytimes.com/athletic", about: "Sports journalism" },
       { title: "Formula 1", url: "https://www.formula1.com/en/latest/all.xml", site: "https://www.formula1.com", about: "Latest F1 news" },
       { title: "Yahoo Sports", url: "https://sports.yahoo.com/rss/", site: "https://sports.yahoo.com", about: "Sport headlines" },
+      { title: "ABC – Sport", url: "https://www.abc.net.au/news/feed/103728570/rss.xml", site: "https://www.abc.net.au/news", about: "Sport from the ABC" },
     ],
   },
   {
@@ -172,6 +174,7 @@ export const CATALOG: CatalogCategory[] = [
       { title: "Open Culture", url: "https://www.openculture.com/feed", site: "https://www.openculture.com", about: "Free culture and education" },
       { title: "Variety", url: "https://variety.com/feed/", site: "https://variety.com", about: "Film, TV and music industry" },
       { title: "Pitchfork", url: "https://pitchfork.com/feed/feed-news/rss", site: "https://pitchfork.com", about: "Music news" },
+      { title: "ABC – Culture", url: "https://www.abc.net.au/news/feed/103728568/rss.xml", site: "https://www.abc.net.au/news", about: "Entertainment and culture from the ABC" },
     ],
   },
   {
@@ -209,3 +212,12 @@ export const CATALOG: CatalogCategory[] = [
     ],
   },
 ];
+
+/** Sorts a title the way a library would: a leading "The" doesn't count. */
+const sortKey = (title: string) => title.replace(/^the\s+/i, "");
+
+/** The categories in their own order, each with its feeds from A to Z. */
+export const CATALOG: CatalogCategory[] = CATEGORIES.map((c) => ({
+  ...c,
+  feeds: [...c.feeds].sort((a, b) => sortKey(a.title).localeCompare(sortKey(b.title), "en", { sensitivity: "base" })),
+}));
